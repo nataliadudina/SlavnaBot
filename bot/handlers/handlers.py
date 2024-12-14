@@ -1,7 +1,8 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.fsm.state import default_state
 from aiogram.types import Message
 
 import bot.keyboards.keyboards as kb
@@ -15,7 +16,7 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 
-@router.message(CommandStart())
+@router.message(CommandStart(), StateFilter(default_state))
 async def cmd_start(message: Message):
     """ При запуске бота создаётся клавиатура с reply buttons. """
     user_id = message.from_user.id
@@ -60,11 +61,11 @@ async def handle_contacts(message: Message):
     await message.answer('Вот наши контакты')
 
 
-@router.message(Command(commands='help'))
+@router.message(Command(commands='help'), StateFilter(default_state))
 async def cmd_help(message: Message):
     await message.answer('All the commands listed')
 
 
-@router.message()
-async def cmd_help(message: Message):
+@router.message(StateFilter(default_state))
+async def cmd_help(message: Message, ):
     await message.answer(gen_answer)

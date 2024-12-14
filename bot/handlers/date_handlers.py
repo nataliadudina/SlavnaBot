@@ -8,7 +8,6 @@ from aiogram.types import Message, CallbackQuery
 
 import bot.keyboards.keyboards as kb
 from bot.filters.filters import IsAdminOrGuide, is_admin, is_guide
-from bot.handlers.period_handlers import DatesInputState
 from bot.keyboards.calendar import generate_calendar
 from bot.keyboards.pagination_kb import create_pagination_keyboard
 from bot.texts.staff_texts import buttons, replies

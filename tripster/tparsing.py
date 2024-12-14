@@ -19,8 +19,6 @@ env = Env()
 env.read_env('.env')
 token = env('TRIPSTER_TOKEN')
 
-# update_hour = 20  # update_after_hour can be changed manually
-
 
 async def handle_tripster(update_hour: int = 20) -> int:
     now = datetime.now()
@@ -36,7 +34,7 @@ async def handle_tripster(update_hour: int = 20) -> int:
         date_str = str(update_time).split(' ')[0]
         time_str = str(update_time).split(' ')[1][:5]
         update_period_str = f'{date_str}%20{time_str}'  # adding time to url
-        url = f"{env('URL')}?updated_after={update_period_str}"
+        url = f"{env('TRIPSTER_URL')}?updated_after={update_period_str}"
 
     parser = TParser(url, token)
     msg_data = parser.get_tours_data()  # getting data for the message
