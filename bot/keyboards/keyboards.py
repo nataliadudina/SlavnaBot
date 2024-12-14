@@ -4,7 +4,7 @@ from bot.texts.staff_texts import buttons
 
 # Создаём reply кнопки
 tours = KeyboardButton(text='Экскурсии 🗺️')
-contacts = KeyboardButton(text='Контакты 📩')
+contacts = KeyboardButton(text='Контакты 📞')
 
 on_date = KeyboardButton(text=buttons['on_date'])
 on_period = KeyboardButton(text=buttons['on_period'])

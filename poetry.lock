@@ -42,6 +42,20 @@ redis = ["redis[hiredis] (>=5.0.1,<5.1.0)"]
 test = ["aresponses (>=2.1.6,<2.2.0)", "pycryptodomex (>=3.19.0,<3.20.0)", "pytest (>=7.4.2,<7.5.0)", "pytest-aiohttp (>=1.0.5,<1.1.0)", "pytest-asyncio (>=0.21.1,<0.22.0)", "pytest-cov (>=4.1.0,<4.2.0)", "pytest-html (>=4.0.2,<4.1.0)", "pytest-lazy-fixture (>=0.6.3,<0.7.0)", "pytest-mock (>=3.12.0,<3.13.0)", "pytest-mypy (>=0.10.3,<0.11.0)", "pytz (>=2023.3,<2024.0)"]
 
 [[package]]
+name = "aiogram-datepicker"
+version = "0.0.8"
+description = "Telegram Bots datepicker & Aiogram datepicker"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "aiogram_datepicker-0.0.8-py3-none-any.whl", hash = "sha256:cc23e1e296be4167aee8f45eea139f1670ff29b188a13e6629cb081cf188c020"},
+    {file = "aiogram_datepicker-0.0.8.tar.gz", hash = "sha256:3e28b688e35652c510915fb15497e31cbb97b0c1557cb113f27dd80ff89c73ec"},
+]
+
+[package.dependencies]
+aiogram = "*"
+
+[[package]]
 name = "aiogram-dialog"
 version = "2.2.0"
 description = "Telegram bot UI framework on top of aiogram"
@@ -1698,4 +1712,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "11c25dd95395a83a00c9866a9644ea9e4341bb67147983f299584682b509bf1e"
+content-hash = "5f16b78ea9e58a56ec266fe1832db6625745310d70f403f911eac909ba920ef2"
