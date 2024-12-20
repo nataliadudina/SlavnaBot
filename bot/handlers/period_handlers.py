@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -10,7 +10,7 @@ from aiogram.types import CallbackQuery, Message
 import bot.keyboards.keyboards as kb
 from bot.filters.filters import is_admin, is_guide
 from bot.keyboards.calendar import generate_calendar
-from bot.texts.staff_texts import replies, buttons
+from bot.texts.staff_texts import replies, buttons, tour_texts
 from googlesheets.tours_filtering import filter_by_period, filter_by_guide_on_period
 
 router = Router()
@@ -41,7 +41,8 @@ async def handle_period_tours(callback: CallbackQuery, state: FSMContext):
     today = datetime.today()
     # Навигатор по календарю в модуле date_handlers.py
     keyboard = await generate_calendar(today.year, today.month, is_period=True)
-    await callback.message.answer(text='Выберите начальную дату периода.',
+    await callback.message.answer(text=f"Выберите первую дату.\n\n"
+                                       f"{tour_texts['cancel_search']}",
                                   reply_markup=keyboard)
     await callback.answer()
     await state.set_state(DatesInputState.start_date)
@@ -65,11 +66,13 @@ async def handle_start_date(callback: CallbackQuery, state: FSMContext):
     await state.update_data(start_date=start_date_str)
 
     # Показ выбранной даты и запрос конечной
-    await callback.answer(f"Первая дата: {start_date.strftime('%d.%m.%Y')}\nВыберете вторую дату.")
+    await callback.answer(f"{start_date.strftime('%d.%m.%Y')}. Выберете вторую дату.")
 
     today = datetime.today()
     keyboard = await generate_calendar(today.year, today.month, is_period=True)
-    await callback.message.edit_text("Выберите конечную дату:", reply_markup=keyboard)
+    await callback.message.edit_text(f"Выберите вторую дату.\n\n"
+                                     f"{tour_texts['cancel_search']}",
+                                     reply_markup=keyboard)
     await state.set_state(DatesInputState.end_date)
 
 
@@ -78,8 +81,6 @@ async def handle_end_date(callback: CallbackQuery, state: FSMContext):
     """ Обработка выбора конечной даты для периода. """
     end_date_str = callback.data.split('_')[2]
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-
-    # await callback.answer(end_date.strftime('%d.%m.%Y'))
 
     # Получаем начальную дату из состояния
     user_data = await state.get_data()
@@ -96,8 +97,8 @@ async def handle_end_date(callback: CallbackQuery, state: FSMContext):
     # Форматирование дат для показа
     first_date = start_date.strftime('%d.%m.%Y')
     second_date = end_date.strftime('%d.%m.%Y')
-    await callback.answer(f"Выбран период: {first_date} - {second_date}\n Ищу туры... 🕝")
-    # Удаляем сообщение с текстом и клавиатурой
+    await callback.answer(f"Ищу заказы с {first_date} по {second_date} 🕝 ...")
+    # Удаляем сообщение с текстом и клавиатурой, т.к. второй раз воспользоваться нельзя
     await callback.message.delete()
 
     # После выбора обеих дат можно продолжить обработку
@@ -116,6 +117,18 @@ async def handle_tours_by_period(callback: CallbackQuery, state: FSMContext):
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
 
+    if start_date < date.today() and end_date < date.today():
+        await callback.message.answer("Информация за этот период недоступна. "
+                                      "Возможен поиск только предстоящих экскурсий. 😈")
+        return
+
+    if end_date < start_date:
+        start_date, end_date = end_date, start_date
+
+    # Форматирование для вывода дат
+    first_date = start_date.strftime('%d.%m.%Y')
+    second_date = end_date.strftime('%d.%m.%Y')
+
     try:
         if is_admin(user_id):
             tours = filter_by_period(start_date, end_date)
@@ -130,9 +143,10 @@ async def handle_tours_by_period(callback: CallbackQuery, state: FSMContext):
         return
 
     if not tours:
-        await callback.message.answer("Нет экскурсий за указанный период.")
+        await callback.message.answer(f"Нет экскурсий с {first_date} по {second_date} 🥺")
         return
 
+    await callback.message.answer(f'С {first_date} по {second_date} найдено экскурсий: {len(tours)}.')
     for row in tours:
         tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in row.items())
         await callback.message.answer(tour_info)
@@ -173,3 +187,5 @@ async def handle_all_tours(callback: CallbackQuery):
     for row in tours:
         tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in row.items())
         await callback.message.answer(tour_info)
+
+    await callback.message.answer(f'Всего экскурсий: {len(tours)}')

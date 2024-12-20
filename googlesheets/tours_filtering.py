@@ -3,7 +3,7 @@ import re
 from datetime import datetime, date
 from typing import Optional
 
-from googlesheets.docs_parsing import get_orders, get_extended_columns, get_brief_columns, get_guides_columns
+from googlesheets.docs_parsing import get_extended_columns, get_brief_columns, get_guides_columns, cached_data
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,11 @@ GUIDES = {
     5148077066: 'Феофания'
 }
 
+# Предкомпилированные паттерны для фильтрации
+GUIDE_PATTERNS = {id_: re.compile(rf'\b{name}\b', re.IGNORECASE) for id_, name in GUIDES.items()}
 
-def format_date(str_date) -> date:
+
+def format_date(str_date: str) -> date:
     # Функция для форматирования даты
     try:
         pattern = '%d.%m.%Y'
@@ -44,7 +47,7 @@ def filter_by_date(
         tour_date = due_date if due_date else date.today()
 
         # Получаем доступ к гугл-таблице и отбираем нужные колонки
-        data = get_orders()
+        data = cached_data
         columns = get_extended_columns()
 
         filtered_data = [
@@ -76,8 +79,8 @@ def filter_by_period(
         Optional[List[Dict[str, Any]]]: Фильтрованные данные или None в случае ошибки.
     """
     try:
-        # Получаем доступ к гугл-таблице и отбираем нужные колонки
-        data = get_orders()
+        # Получаем данные из гугл-таблице и отбираем нужные колонки
+        data = cached_data
         columns = get_brief_columns()
 
         # Фильтрация данных на период
@@ -119,14 +122,14 @@ def filter_by_guide_on_date(
         Optional[List[Dict[str, Any]]]: Фильтрованные данные или None в случае ошибки.
     """
     try:
-        # Получаем доступ к гугл-таблице и отбираем нужные колонки
-        data = get_orders()
+        # Получаем данные из гугл-таблице и отбираем нужные колонки
+        data = cached_data
         columns = get_guides_columns()
 
         # Дата для фильтрации
         tour_date = due_date if due_date else date.today()
         # Паттерн для фильтрации экскурсий по гиду
-        guide_pattern = re.compile(rf'\b{GUIDES.get(guide, "")}\b', re.IGNORECASE)
+        guide_pattern = GUIDE_PATTERNS.get(guide)
 
         # Фильтрация данных на дату
         filtered_data = [
@@ -162,11 +165,12 @@ def filter_by_guide_on_period(
         Optional[List[Dict[str, Any]]]: Фильтрованные данные или None в случае ошибки.
     """
     try:
-        # Получаем доступ к гугл-таблице и отбираем нужные колонки
-        data = get_orders()
+        # Получаем данные из гугл-таблице и отбираем нужные колонки
+        data = cached_data
         columns = get_brief_columns()
+
         # Паттерн для фильтрации экскурсий по гиду
-        guide_pattern = re.compile(rf'\b{GUIDES.get(guide, "")}\b', re.IGNORECASE)
+        guide_pattern = GUIDE_PATTERNS.get(guide)
 
         # Фильтрация данных на период
         if start_date and end_date:

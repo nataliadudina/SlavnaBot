@@ -8,6 +8,8 @@ from aiogram.types import CallbackQuery, Message
 
 import bot.keyboards.keyboards as kb
 from bot.filters.filters import IsAdmin
+from bot.handlers.date_handlers import DateInputState
+from bot.handlers.period_handlers import DatesInputState
 from bot.texts.staff_texts import buttons, tripster_text
 from tripster.tparsing import handle_tripster
 
@@ -27,9 +29,14 @@ class HourInputState(StatesGroup):
 @router.message(Command(commands='cancel'), ~StateFilter(default_state))
 async def cmd_cancel(message: Message, state: FSMContext):
     current_state = await state.get_state()
-    await message.answer(
-        text='Отправка уведомлений отменена.'
-    )
+    if current_state == HourInputState.hour:
+        await message.answer(
+            text='Отправка уведомлений отменена.'
+        )
+    elif current_state in (DateInputState.due_date, DatesInputState.start_date, DatesInputState.end_date):
+        await message.answer(
+            text='Поиск экскурсий отменён.'
+        )
 
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
@@ -122,6 +129,3 @@ async def handle_incorrect_hour_input(message: Message):
     await message.answer(
         text=tripster_text['incorrect_hour']
     )
-
-
-

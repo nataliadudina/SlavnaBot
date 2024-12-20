@@ -10,7 +10,7 @@ import bot.keyboards.keyboards as kb
 from bot.filters.filters import IsAdminOrGuide, is_admin, is_guide
 from bot.keyboards.calendar import generate_calendar
 from bot.keyboards.pagination_kb import create_pagination_keyboard
-from bot.texts.staff_texts import buttons, replies
+from bot.texts.staff_texts import buttons, replies, tour_texts
 from googlesheets.tours_filtering import filter_by_date, filter_by_guide_on_date
 
 router = Router()
@@ -45,7 +45,8 @@ async def handle_date_tours(callback: CallbackQuery, state: FSMContext):
     """
     today = datetime.today()
     keyboard = await generate_calendar(today.year, today.month)
-    await callback.message.edit_text(text='На какую дату найти экскурсии?',
+    await callback.message.edit_text(text=f"На какую дату найти экскурсии?\n\n"
+                                          f"{tour_texts['cancel_search']}",
                                      reply_markup=keyboard)
     await callback.answer()
     await state.set_state(DateInputState.due_date)
@@ -91,38 +92,42 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
     # Получаем user_id из callback
     user_id = callback.from_user.id
 
-    try:
-        # Поиск экскурсий из гугл докса для админов
-        if is_admin(user_id):
-            tours = filter_by_date(orders_date)
-        # Поиск экскурсий из гугл докса для гидов
-        elif is_guide(user_id):
-            tours = filter_by_guide_on_date(user_id, orders_date)
-        else:
-            await callback.answer("У вас нет прав для выполнения этой команды.")
+    if orders_date < date.today():
+        await callback.message.answer(f"Информация на {orders_date.strftime('%d.%m.%Y')} недоступна. "
+                                      "Возможен поиск только предстоящих экскурсий. 😈")
+    else:
+        try:
+            # Поиск экскурсий из гугл докса для админов
+            if is_admin(user_id):
+                tours = filter_by_date(orders_date)
+            # Поиск экскурсий из гугл докса для гидов
+            elif is_guide(user_id):
+                tours = filter_by_guide_on_date(user_id, orders_date)
+            else:
+                await callback.answer("У вас нет прав для выполнения этой команды.")
+                return
+        except Exception as e:
+            logger.error(f"Ошибка при фильтрации экскурсий у {user_id}: {e}")
+            await callback.message.answer("Произошла ошибка при обработке вашего запроса. Попробуйте позже.")
             return
-    except Exception as e:
-        logger.error(f"Ошибка при фильтрации экскурсий у {user_id}: {e}")
-        await callback.message.answer("Произошла ошибка при обработке вашего запроса. Попробуйте позже.")
-        return
 
-    if not tours:
-        await callback.message.answer(replies['no_excursions'])
-        return
+        if not tours:
+            await callback.message.answer(replies['no_excursions'])
+            return
 
-    # Сохраняем информацию об экскурсиях для использования в списке с пагинацией
-    await state.update_data(tours=tours)
+        # Сохраняем информацию об экскурсиях для использования в списке с пагинацией
+        await state.update_data(tours=tours)
 
-    # Формируем первую страницу
-    current_page = 1
-    total_pages = len(tours)
-    tour = tours[current_page - 1]  # Индексация с 0
-    tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in tour.items())
+        # Формируем первую страницу
+        current_page = 1
+        total_pages = len(tours)
+        tour = tours[current_page - 1]  # Индексация с 0
+        tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in tour.items())
 
-    await callback.message.edit_text(
-        text=tour_info,
-        reply_markup=create_pagination_keyboard(current_page, total_pages)
-    )
+        await callback.message.answer(
+            text=tour_info,
+            reply_markup=create_pagination_keyboard(current_page, total_pages)
+        )
 
 
 @router.callback_query(F.data.startswith('page:'))
