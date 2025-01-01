@@ -46,7 +46,7 @@ async def cmd_cancel(message: Message, state: FSMContext):
 @router.message(F.text == buttons['extra'])
 async def make_extra_keyboard(message: Message):
     """ При нажатии кнопки 'Дополнительно' создаются inline buttons с дальнейшим выбором. """
-    await message.answer(text='Твой выбор',
+    await message.answer(text='Ваш выбор',
                          reply_markup=kb.extra_keyboard)
 
 
@@ -60,15 +60,38 @@ async def make_tripster_keyboard(callback: CallbackQuery):
                                      reply_markup=kb.tripster_keyboard)
 
 
-@router.callback_query(F.data == 'send_notes_pressed')
-async def handle_tripster_regular(callback: CallbackQuery):
+@router.callback_query(F.data == 'send_tdy_pressed')
+async def handle_tripster_today(callback: CallbackQuery):
     """
-     Запускает функцию отправки уведомлений на WhatsApp web.
+     Запускает функцию отправки уведомлений на сегодняшние экскурсии через WhatsApp web.
     """
     await callback.answer(f"Начинаем рассылку 📩")
 
     try:
-        messages_count = await handle_tripster()
+        messages_count = await handle_tripster(day='today')
+        if messages_count:
+            await callback.message.edit_text(
+                text=f'Уведомления отправлены! Найдено заказов {messages_count}.',
+                reply_markup=None
+            )
+        else:
+            await callback.message.edit_text(
+                text=tripster_text['no_tripster'],
+                reply_markup=None
+            )
+    except Exception as e:
+        logger.error(f'Произошла ошибка во время отправки уведомлений: {e}')
+
+
+@router.callback_query(F.data == 'send_tmrw_pressed')
+async def handle_tripster_tomorrow(callback: CallbackQuery):
+    """
+     Запускает функцию отправки уведомлений на завтрашние экскурсии через WhatsApp web.
+    """
+    await callback.answer(f"Начинаем рассылку 📩")
+
+    try:
+        messages_count = await handle_tripster(day='tomorrow')
         if messages_count:
             await callback.message.edit_text(
                 text=f'Уведомления отправлены! Найдено заказов {messages_count}.',
@@ -106,7 +129,7 @@ async def handle_hour_input(message: Message, state: FSMContext):
 
         await message.answer(f"Начинаем рассылку 📩")
 
-        messages_count = await handle_tripster(update_hour=hour)
+        messages_count = await handle_tripster(update_hour=hour, day='today')
         if messages_count:
             await message.answer(
                 text=f'Уведомления отправлены! Найдено заказов {messages_count}.'
