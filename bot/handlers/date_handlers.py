@@ -55,10 +55,13 @@ async def handle_date_tours(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(lambda c: c.data.startswith("navigate_"))
 async def navigate_calendar(callback_query: CallbackQuery):
     """ Навигация по календарю: вперёд, назад. """
-    _, year, month = callback_query.data.split("_")
-    keyboard = await generate_calendar(int(year), int(month))
-    await callback_query.message.edit_reply_markup(reply_markup=keyboard)
-    await callback_query.answer()
+    try:
+        _, year, month = callback_query.data.split("_")
+        keyboard = await generate_calendar(int(year), int(month), is_period=False)
+        await callback_query.message.edit_reply_markup(reply_markup=keyboard)
+        await callback_query.answer()
+    except ValueError:
+        await callback_query.answer("Некорректные данные навигации.")
 
 
 @router.callback_query((F.data.startswith('date_') | F.data.in_(['today_pressed', 'tomorrow_pressed'])))
@@ -79,9 +82,6 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
         selected_date = callback.data.split('_')[1]
         orders_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
         await state.update_data(due_date=str(orders_date))
-        # Показ выбранной даты
-        selected_date = datetime.strftime(orders_date, '%d.%m.%Y')
-        await callback.answer(selected_date)
     else:
         await callback.answer("Неизвестная команда.")
         return
@@ -148,3 +148,9 @@ async def handle_pagination(callback: CallbackQuery, state: FSMContext):
         text=tour_info,
         reply_markup=create_pagination_keyboard(current_page, total_pages)
     )
+
+
+@router.callback_query(F.data == "noop")
+async def handle_noop(callback: CallbackQuery):
+    # Игнорируем нажатия на "неактивные" кнопки
+    await callback.answer("Эта кнопка неактивна.", show_alert=False)
