@@ -76,9 +76,13 @@ vk_btn = InlineKeyboardButton(
     url='https://vk.com/slavna53'
 )
 # Inline кнопки подменю
-send_notes = InlineKeyboardButton(
-    text='Отправить уведомления',
-    callback_data='send_notes_pressed'
+send_tdy_notes = InlineKeyboardButton(
+    text='Уведомления на сегодня',
+    callback_data='send_tdy_pressed'
+)
+send_tmrw_notes = InlineKeyboardButton(
+    text='Уведомления на завтра',
+    callback_data='send_tmrw_pressed'
 )
 late_orders = InlineKeyboardButton(
     text='Уведомления для поздних заказов',
@@ -101,6 +105,9 @@ extra_keyboard = InlineKeyboardMarkup(
                      [vk_btn]]
 )
 tripster_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[send_notes],
-                     [late_orders]]
+    inline_keyboard=[
+        [send_tdy_notes],
+        [send_tmrw_notes],
+        [late_orders]
+    ]
 )

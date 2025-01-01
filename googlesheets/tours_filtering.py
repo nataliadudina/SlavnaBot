@@ -3,15 +3,24 @@ import re
 from datetime import datetime, date
 from typing import Optional
 
+from environs import Env
+
 from googlesheets.docs_parsing import get_extended_columns, get_brief_columns, get_guides_columns, cached_data
 
 logger = logging.getLogger(__name__)
 
+env = Env()
+env.read_env('.env')
+# Guides' ids
+zabava = int(env('ZABAVA'))
+agafya = int(env('AGAFYA'))
+feofaniya = int(env('FEOFANIYA'))
+
 # Telegram ids гидов
 GUIDES = {
-    5148077067: 'Забава',
-    5148077068: 'Агафья',
-    5148077066: 'Феофания'
+    zabava: 'Забава',
+    agafya: 'Агафья',
+    feofaniya: 'Феофания'
 }
 
 # Предкомпилированные паттерны для фильтрации
