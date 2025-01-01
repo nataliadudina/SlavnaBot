@@ -9,7 +9,17 @@ MONTH_NAMES = [
 ]
 
 
-async def generate_calendar(year: int, month: int, is_period: bool = False):
+async def generate_calendar(
+        year: int,
+        month: int,
+        is_period: bool = False,
+        selected_start_date: str = None,
+        selected_end_date: str = None
+):
+    """
+    Генерация inline-календаря с подсветкой выбранных дат и диапазона (если is_period=True).
+    """
+    prefix = "pnavigate_" if is_period else "navigate_"
     builder = InlineKeyboardBuilder()
     days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
@@ -20,9 +30,9 @@ async def generate_calendar(year: int, month: int, is_period: bool = False):
     next_year = year if month < 12 else year + 1
 
     builder.row(
-        InlineKeyboardButton(text="<", callback_data=f"navigate_{prev_year}_{prev_month}"),
+        InlineKeyboardButton(text="<", callback_data=f"{prefix}{prev_year}_{prev_month}"),
         InlineKeyboardButton(text=f"{MONTH_NAMES[month - 1]} {year}", callback_data="ignore"),
-        InlineKeyboardButton(text=">", callback_data=f"navigate_{next_year}_{next_month}")
+        InlineKeyboardButton(text=">", callback_data=f"{prefix}{next_year}_{next_month}")
     )
 
     # Строка с днями недели
@@ -33,20 +43,36 @@ async def generate_calendar(year: int, month: int, is_period: bool = False):
     start_weekday = date.weekday()  # День недели начала месяца (0 - понедельник)
     empty_days = start_weekday  # Количество пустых дней в первой строке
 
+    # Конвертация строковых дат в объекты datetime
+    start_date = datetime.strptime(selected_start_date, '%Y-%m-%d').date() if selected_start_date else None
+    end_date = datetime.strptime(selected_end_date, '%Y-%m-%d').date() if selected_end_date else None
+
     # Добавляем пустые кнопки в начале (если месяц не начинается с понедельника)
     week = [InlineKeyboardButton(text=" ", callback_data="ignore") for _ in range(empty_days)]
 
     for day in range(1, 32):  # До 31 дня
         try:
-            date = datetime(year, month, day)
-            if is_period:
-                callback_data = f"period_date_{date.strftime('%Y-%m-%d')}"
-            else:
-                callback_data = f"date_{date.strftime('%Y-%m-%d')}"
+            current_date = datetime(year, month, day).date()
 
-            week.append(InlineKeyboardButton(text=str(day), callback_data=callback_data))
-            if len(week) == 7:  # Если неделя заполнена
-                builder.row(*week)  # Добавляем строку в клавиатуру
+            # Определяем callback_data для кнопок
+            if is_period:
+                callback_data = f"period_date_{current_date.strftime('%Y-%m-%d')}"
+            else:
+                callback_data = f"date_{current_date.strftime('%Y-%m-%d')}"
+
+            # Подсветка выбранных дат
+            if current_date == start_date or current_date == end_date:
+                text = f"{day}*"  # Подсвечиваем выбранный день
+            elif start_date and end_date and start_date < current_date < end_date:
+                text = f"({day})"  # Диапазон между начальной и конечной датой
+            else:
+                text = str(day)
+
+            week.append(InlineKeyboardButton(text=text, callback_data=callback_data))
+
+            # Если неделя заполнена, добавляем строку в клавиатуру
+            if len(week) == 7:
+                builder.row(*week)
                 week = []
         except ValueError:
             break
