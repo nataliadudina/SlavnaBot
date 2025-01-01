@@ -20,13 +20,13 @@ env.read_env('.env')
 token = env('TRIPSTER_TOKEN')
 
 
-async def handle_tripster(update_hour: int = 20) -> int:
+async def handle_tripster(update_hour: int = 20, day: str = 'tomorrow') -> int:
     now = datetime.now()
     update_time = now.replace(hour=update_hour, minute=00, second=0, microsecond=0)
 
     if now < update_time:
         # making regular messaging
-        update_period = date.today() - timedelta(days=60)
+        update_period = date.today() - timedelta(days=90)
         url = f"{env('TRIPSTER_URL')}?updated_after={update_period}"
 
     else:
@@ -37,8 +37,8 @@ async def handle_tripster(update_hour: int = 20) -> int:
         url = f"{env('TRIPSTER_URL')}?updated_after={update_period_str}"
 
     parser = TParser(url, token)
-    msg_data = parser.get_tours_data()  # getting data for the message
-    send_message(msg_data)  # sending messages
+    msg_data = parser.get_tours_data(day)  # getting data for the message
+    await send_message(msg_data)  # sending messages
     if msg_data:
         return len(msg_data)
     return 0

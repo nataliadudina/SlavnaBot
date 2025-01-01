@@ -1,11 +1,14 @@
-import time
+import asyncio
+import logging
 
-import pywhatkit
+from pywhatkit import sendwhatmsg_instantly
 
 from tripster.texts import form_message
 
+logger = logging.getLogger(__name__)
 
-def send_message(data: list[dict]) -> None:
+
+async def send_message(data: list[dict]) -> None:
     """
     Эта функция отправляет уведомления туристам по WhatsApp.
     """
@@ -22,9 +25,8 @@ def send_message(data: list[dict]) -> None:
 
             message = form_message(tour, traveller_name, tour_date, tour_time, to_pay)
 
-            pywhatkit.sendwhatmsg_instantly(phone_no=phone, message=message, tab_close=True)
-
-            time.sleep(5)  # time for opening WhatsApp web in tab and send message
+            await asyncio.to_thread(sendwhatmsg_instantly, phone_no=phone, message=message, wait_time=5, tab_close=True,
+                                    close_time=3)
 
         except Exception as e:
-            print(e)
+            logger.error(f'Произошла ошибка во время отправки уведомлений через WhatsApp web: {e}')
