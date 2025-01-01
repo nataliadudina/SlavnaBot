@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "slavnabot"
+version = "0.1.0"
+description = "TG bot for guided-tour workshop Slavna."
+authors = ["Natalia Dudina <307heito@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = "3.15.0"
+aiosqlite = "^0.20.0"
+requests = "^2.32.3"
+gspread = "^6.1.4"
+google-auth = "^2.36.0"
+google-auth-oauthlib = "^1.2.1"
+google-auth-httplib2 = "^0.2.0"
+aiogram-dialog = "^2.2.0"
+pywhatkit = "^5.4"
+aiogram-datepicker = "^0.0.8"
+
+
+[tool.poetry.group.dev.dependencies]
+environs = "^11.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
