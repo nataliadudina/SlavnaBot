@@ -5,8 +5,10 @@ import logging.config
 from aiogram import Dispatcher, Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 
 import bot.handlers
+
 from bot.handlers import handlers, date_handlers, extra_handlers, period_handlers
 
 from config import bot_config
@@ -17,19 +19,8 @@ config = bot_config
 
 # Инициализация бота и диспетчер
 bot = Bot(token=config.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-dp = Dispatcher()
-# storage = MemoryStorage()
-# dp = Dispatcher(storage=storage)
-# registry = DialogRegistry(dp)
-
-# Регистрация диалога
-# registry.register(dialog)
-
-# Настройка middleware
-# setup_middleware(dp)
-
-# Настройка фильтров
-# setup_filters(dp)
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
 
 # Основной цикл бота
@@ -53,4 +44,7 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info('Bot is turned down.')

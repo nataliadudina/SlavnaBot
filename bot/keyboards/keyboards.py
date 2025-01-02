@@ -35,7 +35,7 @@ admin_keyboard = ReplyKeyboardMarkup(
 guide_keyboard = ReplyKeyboardMarkup(
     keyboard=[[on_date, on_period]],
     resize_keyboard=True,
-    one_time_keyboard=True,
+    one_time_keyboard=False,
 )
 
 # Создаем объекты инлайн-кнопок на дату
