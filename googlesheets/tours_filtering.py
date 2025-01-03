@@ -5,7 +5,7 @@ from typing import Optional
 
 from environs import Env
 
-from googlesheets.docs_parsing import get_extended_columns, get_brief_columns, get_guides_columns, cached_data
+from googlesheets.docs_parsing import get_extended_columns, get_brief_columns, get_guides_columns, get_orders
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def filter_by_date(
         tour_date = due_date if due_date else date.today()
 
         # Получаем доступ к гугл-таблице и отбираем нужные колонки
-        data = cached_data
+        data = get_orders()
         columns = get_extended_columns()
 
         filtered_data = [
@@ -89,7 +89,7 @@ def filter_by_period(
     """
     try:
         # Получаем данные из гугл-таблице и отбираем нужные колонки
-        data = cached_data
+        data = get_orders()
         columns = get_brief_columns()
 
         # Фильтрация данных на период
@@ -132,7 +132,7 @@ def filter_by_guide_on_date(
     """
     try:
         # Получаем данные из гугл-таблице и отбираем нужные колонки
-        data = cached_data
+        data = get_orders()
         columns = get_guides_columns()
 
         # Дата для фильтрации
@@ -175,7 +175,7 @@ def filter_by_guide_on_period(
     """
     try:
         # Получаем данные из гугл-таблице и отбираем нужные колонки
-        data = cached_data
+        data = get_orders()
         columns = get_brief_columns()
 
         # Паттерн для фильтрации экскурсий по гиду
