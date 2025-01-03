@@ -30,7 +30,7 @@ worksheet = sh.worksheet('Заказы')
 
 # Возвращает данные из таблицы в виде списка словарей Python.
 # Каждый словарь представляет собой строку таблицы с ключами в порядке столбцов.
-def get_orders_cached() -> list[dict[str, int | float | str]]:
+def get_orders() -> list[dict[str, int | float | str]]:
     # Загружаем все данные в один запрос
     data = worksheet.get_all_records()
     if not data:
@@ -40,7 +40,7 @@ def get_orders_cached() -> list[dict[str, int | float | str]]:
 
 
 # Кэшируем данные сразу после загрузки
-cached_data = get_orders_cached()
+cached_data = get_orders()
 
 
 # Подробная информация о заказах (12 колонок) для админов
