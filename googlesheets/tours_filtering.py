@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import datetime, date
-from pprint import pprint
 from typing import Optional
 
 from environs import Env
@@ -370,7 +369,3 @@ def filter_for_sa_period(start_date: Optional[date] = None,
     # Объединение и сортировка списков
     filtered_data = sort_tours(tripster_tours + slavna_tours)
     return filtered_data
-
-
-# pprint(filter_for_sa_period())
-# print(len(filter_for_sa_period()))
