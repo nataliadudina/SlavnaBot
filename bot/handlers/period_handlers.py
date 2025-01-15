@@ -9,10 +9,10 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
 import bot.keyboards.keyboards as kb
-from bot.filters.filters import is_admin, is_guide
+from bot.filters.filters import is_admin, is_guide, is_superadmin
 from bot.keyboards.calendar import generate_calendar
 from bot.texts.staff_texts import replies, buttons, tour_texts
-from googlesheets.tours_filtering import filter_by_period, filter_by_guide_on_period
+from googlesheets.tours_filtering import filter_by_period, filter_by_guide_on_period, filter_for_sa_period
 
 router = Router()
 
@@ -165,7 +165,9 @@ async def handle_tours_by_period(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
 
     try:
-        if is_admin(user_id):
+        if is_superadmin(user_id):
+            tours = filter_for_sa_period(start_date, end_date)
+        elif is_admin(user_id):
             tours = filter_by_period(start_date, end_date)
         elif is_guide(user_id):
             tours = filter_by_guide_on_period(user_id, start_date, end_date)
@@ -193,8 +195,10 @@ async def handle_all_tours(callback: CallbackQuery):
     await callback.answer("Ищу все доступные туры ⏳")
 
     try:
+        if is_superadmin(user_id):
+            tours = filter_for_sa_period()
         # Поиск экскурсий из гугл докса для админа
-        if is_admin(user_id):
+        elif is_admin(user_id):
             tours = filter_by_period()
         # Поиск экскурсий из гугл докса для гидов
         elif is_guide(user_id):
