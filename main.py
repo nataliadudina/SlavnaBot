@@ -38,7 +38,7 @@ async def main():
     # await set_main_menu(bot)
     # commands = await bot.get_my_commands()
     try:
-        await dp.start_polling(bot)
+        await dp.start_polling(bot, timeout=60)
     except Exception as e:
         logger.error(f'error: {e}')
 

@@ -7,11 +7,11 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 
 import bot.keyboards.keyboards as kb
-from bot.filters.filters import IsAdminOrGuide, is_admin, is_guide
+from bot.filters.filters import IsAdminOrGuide, is_admin, is_guide, is_superadmin
 from bot.keyboards.calendar import generate_calendar
 from bot.keyboards.pagination_kb import create_pagination_keyboard
 from bot.texts.staff_texts import buttons, replies, tour_texts
-from googlesheets.tours_filtering import filter_by_date, filter_by_guide_on_date
+from googlesheets.tours_filtering import filter_by_date, filter_by_guide_on_date, filter_for_sa_date
 
 router = Router()
 router.message.filter(IsAdminOrGuide())
@@ -98,7 +98,9 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
     else:
         try:
             # Поиск экскурсий из гугл докса для админов
-            if is_admin(user_id):
+            if is_superadmin(user_id):
+                tours = filter_for_sa_date(orders_date)
+            elif is_admin(user_id):
                 tours = filter_by_date(orders_date)
             # Поиск экскурсий из гугл докса для гидов
             elif is_guide(user_id):

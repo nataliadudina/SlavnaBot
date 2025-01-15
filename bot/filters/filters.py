@@ -4,6 +4,11 @@ from aiogram.types import Message
 from config import bot_config
 
 
+def is_superadmin(user_id):
+    """ Проверяет, является ли пользователь супер админом."""
+    return user_id == bot_config.super_admin
+
+
 def is_admin(user_id):
     """ Проверяет, является ли пользователь админом."""
     return user_id in bot_config.admin_ids

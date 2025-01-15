@@ -25,7 +25,7 @@ async def send_message(data: list[dict]) -> None:
 
             message = form_message(tour, traveller_name, tour_date, tour_time, to_pay)
 
-            await asyncio.to_thread(sendwhatmsg_instantly, phone_no=phone, message=message, wait_time=5, tab_close=True,
+            await asyncio.to_thread(sendwhatmsg_instantly, phone_no=phone, message=message, wait_time=7, tab_close=True,
                                     close_time=7)
 
         except Exception as e:
