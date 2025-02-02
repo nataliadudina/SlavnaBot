@@ -8,9 +8,8 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 import bot.handlers
-
 from bot.handlers import handlers, date_handlers, extra_handlers, period_handlers
-
+from bot.scheduler import setup_scheduler
 from config import bot_config
 from logging_config import setup_logging
 
@@ -43,8 +42,14 @@ async def main():
         logger.error(f'error: {e}')
 
 
+async def main_wrapper():
+    """Запускаем проверку экскурсий и бота одновременно"""
+    setup_scheduler(bot)
+    await main()
+
+
 if __name__ == '__main__':
     try:
-        asyncio.run(main())
+        asyncio.run(main_wrapper())
     except KeyboardInterrupt:
         logging.info('Bot is turned down.')

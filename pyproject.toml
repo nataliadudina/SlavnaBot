@@ -17,6 +17,7 @@ google-auth-httplib2 = "^0.2.0"
 aiogram-dialog = "^2.2.0"
 pywhatkit = "^5.4"
 aiogram-datepicker = "^0.0.8"
+apscheduler = "^3.11.0"
 
 
 [tool.poetry.group.dev.dependencies]
