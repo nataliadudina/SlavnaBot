@@ -1,8 +1,19 @@
 import logging
 
 import aiosqlite
+import sqlite3
 
 logger = logging.getLogger(__name__)
+
+
+def get_users() -> list:
+    """Возвращает список user_id всех пользователей из БД"""
+    conn = sqlite3.connect('slavna.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT user_id FROM users')
+    users = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return users
 
 
 async def add_to_db(user_id: int, username: str) -> None:

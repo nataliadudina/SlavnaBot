@@ -31,14 +31,17 @@ async def cmd_start(message: Message):
         await update_user_role(user_id, "admin")
         await message.answer(
             text=f"Привет, {name}! 🌞",
-            reply_markup=kb.admin_keyboard
+
+            reply_markup=kb.admin_keyboard,
+            input_field_placeholder="Нажмите кнопку"
         )
     # Создание reply клавиатуры для гида
     elif is_guide(user_id):
         await update_user_role(user_id, "guide")
         await message.answer(
             f"Привет, {name}! 🪻",
-            reply_markup=kb.guide_keyboard
+            reply_markup=kb.guide_keyboard,
+            input_field_placeholder="Нажмите кнопку"
         )
     # Создание reply стандартной клавиатуры
     else:
