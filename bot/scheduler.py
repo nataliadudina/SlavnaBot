@@ -12,17 +12,21 @@ logger = logging.getLogger()
 
 async def check_tours(bot):
     """Проверяет наличие экскурсии на завтра и отправляет уведомления пользователям"""
-    od = date.today() + timedelta(days=1)
+    admins_notif = date.today() + timedelta(days=2)
+    guides_notif = date.today() + timedelta(days=1)
     users = get_users()
 
     for user_id in users:
         try:
             if is_superadmin(user_id):
-                tours = filter_for_sa_date(od)
+                tours = filter_for_sa_date(guides_notif)
+                day = 'завтра'
             elif is_admin(user_id):
-                tours = filter_by_date(od)
+                tours = filter_by_date(admins_notif)
+                day = 'послезавтра'
             elif is_guide(user_id):
-                tours = filter_by_guide_on_date(user_id, od)
+                tours = filter_by_guide_on_date(user_id, guides_notif)
+                day = 'завтра'
             else:
                 continue
 
@@ -30,7 +34,7 @@ async def check_tours(bot):
                 continue
 
             # Формируем сообщение
-            response = (f"🔔 На завтра запланировано экскурсий: {len(tours)}.\n"
+            response = (f"🔔 На {day} запланировано экскурсий: {len(tours)}.\n"
                         f"Проверьте расписание.")
 
             # Отправляем сообщение пользователю
