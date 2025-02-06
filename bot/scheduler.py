@@ -46,5 +46,5 @@ async def check_tours(bot):
 
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(check_tours, 'cron', hour=14, minute=0, args=[bot])
+    scheduler.add_job(check_tours, 'cron', hour=11, minute=0, args=[bot])
     scheduler.start()
