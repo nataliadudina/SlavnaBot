@@ -75,7 +75,12 @@ vk_btn = InlineKeyboardButton(
     text='ВКонтакте',
     url='https://vk.com/slavna53'
 )
-# Inline кнопки подменю
+gdocs = InlineKeyboardButton(
+    text='Google Doc 🖊',
+    callback_data='gdocs_pressed'
+)
+
+# Inline кнопки подменю для Трипстера
 send_tdy_notes = InlineKeyboardButton(
     text='Уведомления на сегодня',
     callback_data='send_tdy_pressed'
@@ -85,7 +90,7 @@ send_tmrw_notes = InlineKeyboardButton(
     callback_data='send_tmrw_pressed'
 )
 late_orders = InlineKeyboardButton(
-    text='Уведомления для поздних заказов',
+    text='Для поздних заказов',
     callback_data='late_orders_pressed'
 )
 
@@ -101,6 +106,7 @@ period_keyboard = InlineKeyboardMarkup(
 )
 extra_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[[tripster],
+                     [gdocs],
                      [qtickets],
                      [vk_btn]]
 )
