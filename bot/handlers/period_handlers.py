@@ -12,7 +12,7 @@ import bot.keyboards.keyboards as kb
 from bot.filters.filters import is_admin, is_guide, is_superadmin
 from bot.keyboards.calendar import generate_calendar
 from bot.texts.staff_texts import replies, buttons, tour_texts
-from googlesheets.tours_filtering import filter_by_period, filter_by_guide_on_period, filter_for_sa_period
+from googlesheets.tours_filtering import filter_by_period, filter_for_sa_period
 
 router = Router()
 
@@ -170,7 +170,7 @@ async def handle_tours_by_period(callback: CallbackQuery, state: FSMContext):
         elif is_admin(user_id):
             tours = filter_by_period(start_date, end_date)
         elif is_guide(user_id):
-            tours = filter_by_guide_on_period(user_id, start_date, end_date)
+            tours = filter_by_period(start_date, end_date, guide=user_id)
         else:
             await callback.answer("У вас нет прав для выполнения этой команды.")
             return
@@ -202,7 +202,7 @@ async def handle_all_tours(callback: CallbackQuery):
             tours = filter_by_period()
         # Поиск экскурсий из гугл докса для гидов
         elif is_guide(user_id):
-            tours = filter_by_guide_on_period(user_id)
+            tours = filter_by_period(guide=user_id)
         else:
             await callback.answer("У вас нет прав для выполнения этой команды.")
             return

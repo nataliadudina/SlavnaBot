@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime
 
 from googlesheets.docs_parsing import worksheet
@@ -15,7 +16,7 @@ def parse_record(data: list) -> list:
         4: 'Ай-да на Славню',
         5: 'Заморские купцы',
         6: 'История в двух голосах',
-        7: ' Иное'
+        7: 'Иное'
     }
     # Обязательные данные
     tour_date = data[0]
@@ -45,17 +46,27 @@ def parse_record(data: list) -> list:
     return record_data
 
 
-def find_insert_index(data, new_datetime):
+def find_insert_index(data, new_datetime) -> int:
     """
     Определяет индекс, куда вставить новую запись, чтобы сохранить сортировку по дате и времени.
     """
     for i, row in enumerate(data):
         try:
             row_datetime = datetime.strptime(row[0] + ' ' + row[1], '%d.%m.%Y %H:%M')
-        except ValueError:
-            continue
-        if new_datetime < row_datetime:
-            return i + 1
+
+            if new_datetime < row_datetime:
+                return i + 1
+        except (ValueError, IndexError):
+            if i + 1 < len(data):
+
+                try:
+                    next_row = data[i + 1]
+                    next_datetime = datetime.strptime(next_row[0] + ' ' + next_row[1], '%d.%m.%Y %H:%M')
+                    if (new_datetime.year, new_datetime.month) < (next_datetime.year, next_datetime.month):
+                        return i + 1
+                except (ValueError, IndexError):
+                    continue
+
     return len(data) + 1
 
 

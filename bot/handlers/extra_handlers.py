@@ -22,6 +22,9 @@ router.message.filter(IsAdmin())
 logger = logging.getLogger(__name__)
 
 
+# ==================== States =====================
+
+
 # Состояние для ожидания часа
 class HourInputState(StatesGroup):
     hour = State()
@@ -36,6 +39,9 @@ class OrderInputState(StatesGroup):
     price = State()
     guests = State()
     place = State()
+
+
+# ==================== Helper func =====================
 
 
 async def save_record(message: Message, state: FSMContext):
@@ -57,7 +63,8 @@ async def save_record(message: Message, state: FSMContext):
         add_record(new_record)
         await message.answer('✅ Запись успешно добавлена в Google Doc!')
     except APIError as e:
-        await message.answer(f'⚠ Ошибка API Google Sheets: {e}. Попробуйте позже.')
+        await message.answer(f'⚠ Ошибка API Google Sheets. Попробуйте позже.')
+        logger.error(f'⚠ Ошибка API Google Sheets: {e}. Попробуйте позже.')
     except TypeError:
         await message.answer('❌ Ошибка формата данных. Проверьте ввод.')
     except Exception as e:
@@ -67,13 +74,7 @@ async def save_record(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(OrderInputState.place)
-async def write_to_googledoc(message: Message, state: FSMContext):
-    """Записывает в Google Sheets новую запись после последнего вопроса."""
-    await state.update_data(place=message.text)
-    await save_record(message, state)
-
-
+# ==================== Cancel command =====================
 # Этот хэндлер срабатывает на команду "/cancel" в любых состояниях,
 # кроме состояния по умолчанию, и отключает машину состояний
 @router.message(Command(commands='cancel'), ~StateFilter(default_state))
@@ -100,7 +101,7 @@ async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
 
 
-# Только для администраторов
+# ==================== 'Дополнительно' button =====================
 @router.message(F.text == buttons['extra'])
 async def make_extra_keyboard(message: Message):
     """ При нажатии кнопки 'Дополнительно' создаются inline buttons с дальнейшим выбором. """
@@ -108,6 +109,7 @@ async def make_extra_keyboard(message: Message):
                          reply_markup=kb.extra_keyboard)
 
 
+# ==================== Tripster =====================
 @router.callback_query(F.data == 'tripster_pressed')
 async def make_tripster_keyboard(callback: CallbackQuery):
     """
@@ -212,6 +214,13 @@ async def handle_incorrect_hour_input(message: Message):
     )
 
 
+# ==================== Writing to Google Doc =====================
+@router.message(Command(commands='log'), ~StateFilter(default_state))
+async def cmd_log(message: Message, state: FSMContext):
+    """ Хендлер для прерывания опроса и вызова функции записи экскурсии в докс."""
+    await save_record(message, state)
+
+
 @router.callback_query(F.data == 'gdocs_pressed')
 async def ask_for_datetime(callback: CallbackQuery, state: FSMContext):
     """ Запрашивает дату и время для записи."""
@@ -261,12 +270,6 @@ async def get_tour_type(message: Message, state: FSMContext):
     #     return
 
 
-@router.message(Command(commands='log'), ~StateFilter(default_state))
-async def cmd_log(message: Message, state: FSMContext):
-    """ Хендлер для прерывания опроса и вызова функции записи экскурсии в докс."""
-    await save_record(message, state)
-
-
 @router.message(OrderInputState.client_data)
 async def add_client_data(message: Message, state: FSMContext):
     await state.update_data(client_data=message.text)
@@ -301,6 +304,6 @@ async def add_guides(message: Message, state: FSMContext):
 
 @router.message(OrderInputState.place)
 async def write_to_googledoc(message: Message, state: FSMContext):
-    """Записывает в google doc новую запись."""
+    """Записывает в google doc новую запись после последнего вопроса."""
     await state.update_data(place=message.text)
     await save_record(message, state)

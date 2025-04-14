@@ -11,7 +11,7 @@ from bot.filters.filters import IsAdminOrGuide, is_admin, is_guide, is_superadmi
 from bot.keyboards.calendar import generate_calendar
 from bot.keyboards.pagination_kb import create_pagination_keyboard
 from bot.texts.staff_texts import buttons, replies, tour_texts
-from googlesheets.tours_filtering import filter_by_date, filter_by_guide_on_date, filter_for_sa_date
+from googlesheets.tours_filtering import filter_by_date, filter_for_sa_date
 
 router = Router()
 router.message.filter(IsAdminOrGuide())
@@ -68,7 +68,7 @@ async def navigate_calendar(callback_query: CallbackQuery):
 async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
     """
     Обработка выбора даты: сегодня, завтра, или конкретная дата.
-    Запускает функцию поиска экскурсий из googlesheet, запланированных на выбранную дату.
+    Запускает функцию поиска экскурсий из google sheet, запланированных на выбранную дату.
     """
     await callback.answer(f"Ищу экскурсии 🔎")
 
@@ -104,7 +104,7 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
                 tours = filter_by_date(orders_date)
             # Поиск экскурсий из гугл докса для гидов
             elif is_guide(user_id):
-                tours = filter_by_guide_on_date(user_id, orders_date)
+                tours = filter_by_date(orders_date, guide=user_id)
             else:
                 await callback.answer("У вас нет прав для выполнения этой команды.")
                 return
