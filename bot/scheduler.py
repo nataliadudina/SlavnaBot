@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot.db.db import get_users
 from bot.filters.filters import is_superadmin, is_admin, is_guide
-from googlesheets.tours_filtering import filter_for_sa_date, filter_by_date, filter_by_guide_on_date
+from googlesheets.tours_filtering import filter_for_sa_date, filter_by_date
 
 logger = logging.getLogger()
 
@@ -25,7 +25,7 @@ async def check_tours(bot):
                 tours = filter_by_date(admins_notif)
                 day = 'послезавтра'
             elif is_guide(user_id):
-                tours = filter_by_guide_on_date(user_id, guides_notif)
+                tours = filter_by_date(guides_notif, guide=user_id)
                 day = 'завтра'
             else:
                 continue
