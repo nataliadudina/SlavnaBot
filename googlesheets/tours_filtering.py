@@ -1,12 +1,12 @@
 import logging
-import re
 from datetime import datetime, date
+from difflib import get_close_matches
 from typing import Optional
 
 from environs import Env
 
 from googlesheets.docs_parsing import get_brief_columns, get_guides_columns, get_orders, get_extended_columns
-from googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders
+from googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders, get_brief_mpcols
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +23,6 @@ GUIDES = {
     zabava: {'name': 'Забава', 'surname': 'Путятина'},
     agafya: {'name': 'Агафья', 'surname': 'Селиванова'},
     feofaniya: {'name': 'Феофания', 'surname': 'Маркова'}
-}
-
-GUIDE_PATTERNS = {
-    id_: {
-        'name': re.compile(rf'\b{name["name"]}\b', re.IGNORECASE),
-        'surname': re.compile(rf'\b{name["surname"]}\b', re.IGNORECASE)
-    }
-    for id_, name in GUIDES.items()
 }
 
 
@@ -55,52 +47,64 @@ def sort_tours(data: list[dict]) -> list[dict]:
     )
 
 
+def guide_mentioned_with_typos(row: dict, guide_id: int) -> bool:
+    """
+    Проверяет, упоминается ли гид в строке row (в полях 'Герой' и 'Второй герой'),
+    с учётом возможных опечаток.
+    """
+    guide = GUIDES[guide_id]
+    targets = [row.get('Герой', ''), row.get('Второй герой', '')]
+
+    for target in targets:
+        words = target.strip().split()
+        if any(
+                get_close_matches(word, [guide['name'], guide['surname']], cutoff=0.7)
+                for word in words
+        ):
+            return True
+    return False
+
+
 # =================== Major filtering ===================
 def filter_data(
         data: list[dict],
         columns: list[str],
         start_date: date,
         end_date: Optional[date] = None,
-        patterns: Optional[dict[str, re.Pattern[str]]] = None
+        guide_id: Optional[int] = None
 ) -> list[dict]:
     """
     Универсальная функция для фильтрации экскурсий Славны по дате или конкретному периоду.
-    Может фильтровать по гиду, если переданы patterns.
+    Может фильтровать по гиду, если передан guide_id.
     """
 
     return [
         {header: info for header, info in row.items() if header in columns and info}
         for row in data
         if (date_value := format_date(row.get('Дата')))
-        and start_date <= date_value <= (end_date or start_date)
-        and (
-            not patterns
-            or any(
-                pattern.search(row.get('Герой', '').strip()) or pattern.search(row.get('Второй герой', '').strip())
-                for pattern in patterns.values()
-                )
+           and start_date <= date_value <= (end_date or start_date)
+           and (
+                   not guide_id
+                   or guide_mentioned_with_typos(row, guide_id)
            )
     ]
 
 
-def filter_data_from_today(data: list[dict], columns: list[str], patterns: Optional[dict[str, re.Pattern[str]]] = None)\
+def filter_data_from_today(data: list[dict], columns: list[str], guide_id: Optional[int] = None) \
         -> list[dict]:
     """
     Универсальная функция для фильтрации всех экскурсий Славны с сегодняшнего дня.
-    Может фильтровать по гиду, если переданы patterns.
+    Может фильтровать по гиду, если передан guide_id.
     """
 
     return [
         {header: info for header, info in row.items() if header in columns and info}
         for row in data
         if (date_value := format_date(row.get('Дата')))
-        and date_value >= date.today()
-        and (
-            not patterns
-            or any(
-                pattern.search(row.get('Герой', '').strip()) or pattern.search(row.get('Второй герой', '').strip())
-                for pattern in patterns.values()
-                )
+           and date_value >= date.today()
+           and (
+                   not guide_id
+                   or guide_mentioned_with_typos(row, guide_id)
            )
     ]
 
@@ -115,7 +119,7 @@ def get_tripster_and_slavna_tours(guide: int, slavna_data: list[dict], columns: 
     Args:
         guide (int): ID гида
         slavna_data (list[dict]): Основные данные экскурсий
-        columns (list[str]): Колонки для фильтрации
+        columns (list[str]): Колонки для фильтрации (docs Славны)
         start_date (Optional[date]): Начальная дата периода
         end_date (Optional[date]): Конечная дата периода
         from_today (bool): Если True, фильтрует только с сегодняшнего дня.
@@ -123,6 +127,8 @@ def get_tripster_and_slavna_tours(guide: int, slavna_data: list[dict], columns: 
     Returns:
         list[dict]: Отфильтрованные и объединенные экскурсии
     """
+    brief_columns = get_brief_mpcols()
+
     if guide == feofaniya:
         tripster_data = get_extra_orders('Маркова')
         extra_columns = get_m_columns()
@@ -133,12 +139,13 @@ def get_tripster_and_slavna_tours(guide: int, slavna_data: list[dict], columns: 
         return []
 
     if from_today:
-        tripster_tours = filter_data_from_today(tripster_data, extra_columns)
-        slavna_tours = filter_data_from_today(slavna_data, columns, patterns=GUIDE_PATTERNS.get(guide))
+        tripster_tours = filter_data_from_today(tripster_data, brief_columns)
+        slavna_tours = filter_data_from_today(slavna_data, columns, guide_id=guide)
     else:
-        tripster_tours = filter_data(tripster_data, extra_columns, start_date=start_date, end_date=end_date)
+        tripster_columns = brief_columns if end_date else extra_columns
+        tripster_tours = filter_data(tripster_data, tripster_columns, start_date=start_date, end_date=end_date)
         slavna_tours = filter_data(slavna_data, columns, start_date=start_date, end_date=end_date,
-                                   patterns=GUIDE_PATTERNS.get(guide))
+                                   guide_id=guide)
     logger.debug(f"Славна: {len(slavna_tours)} экскурсий, Трипстер: {len(tripster_tours)} экскурсий.")
 
     return sort_tours(tripster_tours + slavna_tours)
@@ -171,7 +178,7 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
                 # Для Феофании и Забавы
                 return get_tripster_and_slavna_tours(guide, data, columns, start_date=tour_date)
             # Для Агафьи
-            return filter_data(data, columns, tour_date, patterns=GUIDE_PATTERNS.get(guide))
+            return filter_data(data, columns, tour_date, guide_id=guide)
         # Для админов
         columns = get_extended_columns()
         return filter_data(data, columns, tour_date)
@@ -211,13 +218,13 @@ def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date]
                 if guide in (feofaniya, zabava):
                     return get_tripster_and_slavna_tours(guide, data, columns, start_date, end_date)
                 # Для Агафьи
-                return filter_data(data, columns, start_date, end_date, patterns=GUIDE_PATTERNS.get(guide))
-            # Фильтрация данных с сегодняшнего дня
+                return filter_data(data, columns, start_date, end_date, guide_id=guide)
+                # Фильтрация данных с сегодняшнего дня
             else:
                 if guide in (feofaniya, zabava):
                     return get_tripster_and_slavna_tours(guide, data, columns, from_today=True)
                 # Для Агафьи
-                return filter_data_from_today(data, columns, patterns=GUIDE_PATTERNS.get(guide))
+                return filter_data_from_today(data, columns, guide_id=guide)
         # Для админов
         else:
             columns = get_brief_columns()
@@ -233,18 +240,16 @@ def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date]
 
 
 # =================== Super Admin ===================
-def get_data_for_sa(slavna_tours: list[dict], start_date: Optional[date] = None, end_date: Optional[date] = None,
-                                  from_today: bool = False) -> list[dict]:
+def get_data_for_sa(slavna_tours: list[dict],
+                    columns: list[str],
+                    start_date: Optional[date] = None,
+                    end_date: Optional[date] = None,
+                    from_today: bool = False) -> list[dict]:
     """ Собирает данные по экскурсиям обоих гидов с личных Трипстеров и все экскурсии Славны"""
     # Сбор данных с личных Трипстеров
     tripster_m = get_extra_orders('Маркова')
-    extra_mcolumns = get_m_columns()
-
     tripster_p = get_extra_orders('Путятина')
-    extra_pcolumns = get_p_columns()
-
     tripster_data = tripster_m + tripster_p
-    columns = extra_mcolumns + extra_pcolumns
 
     # Список всех запланированных экскурсий с личных Трипстеров
     if from_today:
@@ -272,12 +277,18 @@ def filter_for_sa_date(due_date: Optional[date] = None) -> list[dict] | None:
     Returns:
         Optional[List[Dict[str, Any]]]: Фильтрованные данные или None в случае ошибки.
     """
+
+    # Колонки с Трипстеров (extended)
+    extra_mcolumns = get_m_columns()
+    extra_pcolumns = get_p_columns()
+    columns = extra_mcolumns + extra_pcolumns
+
     tour_date = due_date if due_date else date.today()
 
     # Экскурсии от Славны
     slavna_tours = filter_by_date(tour_date)
 
-    return get_data_for_sa(slavna_tours, tour_date)
+    return get_data_for_sa(slavna_tours, columns, tour_date)
 
 
 def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[date] = None) -> list[dict] | None:
@@ -294,9 +305,13 @@ def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[d
     Returns:
         Optional[List[Dict[str, Any]]]: Фильтрованные данные или None в случае ошибки.
     """
+
+    # Колонки с Трипстеров (brief)
+    columns = get_brief_mpcols()
+
     # Экскурсии от Славны
     slavna_tours = filter_by_period(start_date=start_date, end_date=end_date)
 
     if start_date and end_date:
-        return get_data_for_sa(slavna_tours, start_date, end_date)
-    return get_data_for_sa(slavna_tours, date.today(), from_today=True)
+        return get_data_for_sa(slavna_tours, columns, start_date, end_date)
+    return get_data_for_sa(slavna_tours, columns, date.today(), from_today=True)

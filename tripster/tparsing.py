@@ -25,7 +25,7 @@ async def handle_tripster(update_hour: int = 20, day: str = 'tomorrow') -> int:
     update_time = now.replace(hour=update_hour, minute=00, second=0, microsecond=0)
 
     if now < update_time:
-        # making regular messaging
+        # making regular messaging for orders made during last 3 months
         update_period = date.today() - timedelta(days=90)
         url = f"{env('TRIPSTER_URL')}?updated_after={update_period}"
 
