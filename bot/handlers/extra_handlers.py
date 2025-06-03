@@ -233,41 +233,50 @@ async def ask_for_datetime(callback: CallbackQuery, state: FSMContext):
 
 @router.message(OrderInputState.dt)
 async def get_datetime(message: Message, state: FSMContext):
-    try:
-        date_text = message.text
-        if len(date_text.split()[0].split('.')[2]) == 2:  # если год состоит из двух цифр
-            date_text = date_text.replace(date_text.split()[0].split('.')[2], '20' + date_text.split()[0].split('.')[2])
+    """ Валидация даты и времени."""
+    date_text = message.text.strip()
+    date_formats = ["%d.%m.%Y %H:%M", "%d.%m.%y %H:%M"]
+    for fmt in date_formats:
+        try:
+            new_datetime = datetime.strptime(date_text, fmt)
 
-        new_datetime = datetime.strptime(date_text, "%d.%m.%Y %H:%M")
+            # если год состоит из двух цифр
+            if new_datetime.year < 2000:
+                new_datetime = new_datetime.replace(year=new_datetime.year + 2000)
 
-        await state.update_data(new_datetime=new_datetime)
-        await message.answer(text=googledocs_text['tour_type'],
-                             reply_markup=None)
-        await state.set_state(OrderInputState.tour_type)
-    except ValueError:
-        await message.answer("❌ Неверный формат. Введите дату и время в формате ДД.ММ.ГГГГ ЧЧ:ММ или ДД.ММ.ГГ ЧЧ:ММ")
-        return
+            if new_datetime < datetime.now():
+                await message.answer("❌ Укажите корректную дату: она не может быть прошедшей.")
+                return
+
+            await state.update_data(new_datetime=new_datetime)
+            await message.answer(text=googledocs_text['tour_type'],
+                                 reply_markup=None)
+            await state.set_state(OrderInputState.tour_type)
+            return
+
+        except ValueError:
+            continue
+
+    await message.answer(
+        "❌ Неверный формат. Введите дату и время в формате:\n"
+        "• ДД.ММ.ГГГГ ЧЧ:ММ\n"
+        "• ДД.ММ.ГГ ЧЧ:ММ"
+    )
 
 
 @router.message(OrderInputState.tour_type)
 async def get_tour_type(message: Message, state: FSMContext):
-    await state.update_data(tour_type=message.text)
+    """Обрабатывает выбор типа тура: номер из списка или произвольный текст."""
+    tour_type = message.text.strip()
+
+    if tour_type.isdigit() and not 1 <= int(tour_type) <= 7:
+        await message.answer("❌ Неверный номер программы. Выберите число от 1 до 7")
+        return  # Остаемся в текущем состоянии для повторного ввода
+
+    await state.update_data(tour_type=tour_type)
     await message.answer(text=googledocs_text['client_data'],
                          reply_markup=None)
     await state.set_state(OrderInputState.client_data)
-
-    # try:
-    #     tour_type = int(message.text)
-    #     if not (1 <= tour_type <= 7):
-    #         await message.answer("❌ Неверный номер программы. Выберите число от 1 до 7")
-    #         return
-    #     await state.update_data(tour_type=tour_type)
-    #     await message.answer(text=googledocs_text['client_data'],
-    #                          reply_markup=None)
-    #     await state.set_state(OrderInputState.client_data)
-    # except ValueError:
-    #     await message.answer("❌ Неверный номер программы. Выберите число от 1 до 7")
-    #     return
 
 
 @router.message(OrderInputState.client_data)

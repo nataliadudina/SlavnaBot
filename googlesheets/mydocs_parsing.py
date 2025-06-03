@@ -75,3 +75,7 @@ def get_admin_pcolumns() -> list[str]:
 def get_p_columns() -> list[str]:
     return get_columns('Путятина', [(0, 3), (4, 7), (8, 10)])
 
+
+# Минимум колонок для обоих гидов
+def get_brief_mpcols() -> list[str]:
+    return get_columns('Путятина', [(0, 3), (6, 7)])
