@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime, date
+from typing import Optional
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -11,7 +12,7 @@ from aiogram.types import CallbackQuery, Message
 import bot.keyboards.keyboards as kb
 from bot.filters.filters import is_admin, is_guide, is_superadmin
 from bot.keyboards.calendar import generate_calendar
-from bot.texts.staff_texts import replies, buttons, tour_texts
+from bot.texts.staff_texts import buttons, tour_texts
 from googlesheets.tours_filtering import filter_by_period, filter_for_sa_period
 
 router = Router()
@@ -25,16 +26,30 @@ class DatesInputState(StatesGroup):
     end_date = State()
 
 
-async def send_tours_list(tours: list[dict], message: Message, start_date: str, end_date: str):
+async def send_tours_list(tours: list[dict], errors: list[str], message: Message,
+                          start_date: Optional[str] = None, end_date: Optional[str] = None):
     """ Вывод сообщений с найденными экскурсиями или сообщения, что экскурсий нет."""
-    if not tours:
+    if not tours and not errors:
         await message.answer(f"Нет экскурсий с {start_date} по {end_date} 🥺")
         return
 
-    await message.answer(f"С {start_date} по {end_date} найдено экскурсий: {len(tours)}.")
-    for row in tours:
-        tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in row.items())
-        await message.answer(tour_info)
+    if tours:
+        for row in tours:
+            tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in row.items())
+            await message.answer(tour_info)
+
+        if start_date and end_date:
+            await message.answer(f"С {start_date} по {end_date} найдено экскурсий: {len(tours + errors)}.")
+        else:
+            await message.answer(f'Всего экскурсий: {len(tours + errors)}')
+
+    # Отправка предупреждения, если есть ошибки
+    if errors:
+        errors_list = '\n'.join(errors)
+        await message.answer(
+            f"⚠️ Найдены ошибки в записи для экскурсий:\n"
+            f"{errors_list}.\nСообщите, пожалуйста, администратору."
+        )
 
 
 @router.message(F.text == buttons['on_period'])
@@ -166,20 +181,20 @@ async def handle_tours_by_period(callback: CallbackQuery, state: FSMContext):
 
     try:
         if is_superadmin(user_id):
-            tours = filter_for_sa_period(start_date, end_date)
+            tours, errors = filter_for_sa_period(start_date, end_date)
         elif is_admin(user_id):
-            tours = filter_by_period(start_date, end_date)
+            tours, errors = filter_by_period(start_date, end_date)
         elif is_guide(user_id):
-            tours = filter_by_period(start_date, end_date, guide=user_id)
+            tours, errors = filter_by_period(start_date, end_date, guide=user_id)
         else:
             await callback.answer("У вас нет прав для выполнения этой команды.")
             return
     except Exception as e:
         logger.error(f"Ошибка при загрузке экскурсий за период для {user_id}: {e}")
-        await callback.message.answer("Произошла ошибка при обработке вашего запроса. Попробуйте позже.")
+        await callback.message.answer("Произошла ошибка при обработке вашего запроса. Сообщите администратору.")
         return
 
-    await send_tours_list(tours, callback.message, first_date, second_date)
+    await send_tours_list(tours, errors, callback.message, first_date, second_date)
 
     # Сброс состояния
     await state.clear()
@@ -196,28 +211,19 @@ async def handle_all_tours(callback: CallbackQuery):
 
     try:
         if is_superadmin(user_id):
-            tours = filter_for_sa_period()
+            tours, errors = filter_for_sa_period()
         # Поиск экскурсий из гугл докса для админа
         elif is_admin(user_id):
-            tours = filter_by_period()
+            tours, errors = filter_by_period()
         # Поиск экскурсий из гугл докса для гидов
         elif is_guide(user_id):
-            tours = filter_by_period(guide=user_id)
+            tours, errors = filter_by_period(guide=user_id)
         else:
             await callback.answer("У вас нет прав для выполнения этой команды.")
             return
     except Exception as e:
         logger.error(f"Ошибка при фильтрации экскурсий у {user_id}: {e}")
-        await callback.message.answer("Произошла ошибка при обработке вашего запроса. Попробуйте позже.")
+        await callback.message.answer("Произошла ошибка при обработке вашего запроса. Сообщите администратору.")
         return
 
-    if not tours:
-        await callback.message.answer(replies['no_excursions'])
-        return
-
-    # Отправляем информацию об экскурсиях
-    for row in tours:
-        tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in row.items())
-        await callback.message.answer(tour_info)
-
-    await callback.message.answer(f'Всего экскурсий: {len(tours)}')
+    await send_tours_list(tours, errors, callback.message)

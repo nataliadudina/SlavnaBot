@@ -99,12 +99,12 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
         try:
             # Поиск экскурсий из гугл докса для админов
             if is_superadmin(user_id):
-                tours = filter_for_sa_date(orders_date)
+                tours, errors = filter_for_sa_date(orders_date)
             elif is_admin(user_id):
-                tours = filter_by_date(orders_date)
+                tours, errors = filter_by_date(orders_date)
             # Поиск экскурсий из гугл докса для гидов
             elif is_guide(user_id):
-                tours = filter_by_date(orders_date, guide=user_id)
+                tours, errors = filter_by_date(orders_date, guide=user_id)
             else:
                 await callback.answer("У вас нет прав для выполнения этой команды.")
                 return
@@ -113,23 +113,31 @@ async def handle_near_tours(callback: CallbackQuery, state: FSMContext):
             await callback.message.answer("Произошла ошибка при обработке вашего запроса. Попробуйте позже.")
             return
 
-        if not tours:
+        if not tours and not errors:
             await callback.message.answer(replies['no_excursions'])
             return
 
         # Сохраняем информацию об экскурсиях для использования в списке с пагинацией
         await state.update_data(tours=tours)
 
-        # Формируем первую страницу
-        current_page = 1
-        total_pages = len(tours)
-        tour = tours[current_page - 1]  # Индексация с 0
-        tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in tour.items())
+        if tours:
+            # Формируем первую страницу
+            current_page = 1
+            total_pages = len(tours)
+            tour = tours[current_page - 1]  # Индексация с 0
+            tour_info = "\n".join(f"<b>{header}</b>: {info}" for header, info in tour.items())
 
-        await callback.message.answer(
-            text=tour_info,
-            reply_markup=create_pagination_keyboard(current_page, total_pages)
-        )
+            await callback.message.answer(
+                text=tour_info,
+                reply_markup=create_pagination_keyboard(current_page, total_pages)
+            )
+        # Отправка предупреждения, если есть ошибки
+        if errors:
+            errors_list = '\n'.join(errors)
+            await callback.message.answer(
+                f"⚠️ Найдены ошибки в записи для экскурсий:\n"
+                f"{errors_list}.\nСообщите, пожалуйста, администратору."
+            )
 
 
 @router.callback_query(F.data.startswith('page:'))
