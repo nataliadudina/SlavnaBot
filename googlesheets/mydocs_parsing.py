@@ -10,17 +10,17 @@ env.read_env('.env')
 
 logger = logging.getLogger(__name__)
 
-# Путь к JSON-файлу с ключами
+# Path to JSON with keys
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), 'google_creds.json')
 
-# Список областей авторизации
+# List of authorization scopes
 SCOPES = [env('SCOPES')]
 
-# Настройка авторизации
+# Authorization set up
 credentials = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
 gc = gspread.authorize(credentials)
 
-# Открытие Google Sheet по ссылкам
+# Opening a Google Sheet via a links
 sheet_urls = {
     'Маркова': env('SPREADSHEET_M_URL'),
     'Путятина': env('SPREADSHEET_P_URL')
@@ -32,7 +32,7 @@ worksheets = {
 }
 
 
-# Функция для получения данных из листа
+# Get data from google sheet
 def get_extra_orders(sheet_name: str) -> list[dict[str, int | float | str]]:
     worksheet = worksheets[sheet_name]
     data = worksheet.get_all_records()
@@ -42,13 +42,13 @@ def get_extra_orders(sheet_name: str) -> list[dict[str, int | float | str]]:
     return data
 
 
-# Кэшируем данные для всех листов
+# Cash data
 cached_data = {
     name: get_extra_orders(name) for name in worksheets
 }
 
 
-# Функция для получения колонок
+# Get columns
 def get_columns(sheet_name: str, column_ranges: list[tuple[int, int]]) -> list[str]:
     headers = list(cached_data[sheet_name][0])
     return [
@@ -58,24 +58,26 @@ def get_columns(sheet_name: str, column_ranges: list[tuple[int, int]]) -> list[s
     ]
 
 
-# Получение данных для Марковой
+# Get data for Маркова
 def get_admin_mcolumns() -> list[str]:
     return get_columns('Маркова', [(0, 5), (6, 7), (8, 9)])
 
 
+# All columns for Маркова
 def get_m_columns() -> list[str]:
     return get_columns('Маркова', [(0, 3), (4, 7), (8, 9)])
 
 
-# Получение данных для Путятиной
+# Get data for Путятина
 def get_admin_pcolumns() -> list[str]:
     return get_columns('Путятина', [(0, 5), (6, 7), (8, 9)])
 
 
+# All columns for Путятина
 def get_p_columns() -> list[str]:
     return get_columns('Путятина', [(0, 3), (4, 7), (8, 10)])
 
 
-# Минимум колонок для обоих гидов
+# Reduced columns for both guids
 def get_brief_mpcols() -> list[str]:
     return get_columns('Путятина', [(0, 3), (6, 7)])

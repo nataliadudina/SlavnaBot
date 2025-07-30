@@ -11,7 +11,7 @@ logger = logging.getLogger()
 
 
 async def check_tours(bot):
-    """Проверяет наличие экскурсии на завтра и отправляет уведомления пользователям"""
+    """ Checks for tour availability for tomorrow and sends notifications to users """
     admins_notif = date.today() + timedelta(days=2)
     guides_notif = date.today() + timedelta(days=1)
     users = get_users()
@@ -19,13 +19,13 @@ async def check_tours(bot):
     for user_id in users:
         try:
             if is_superadmin(user_id):
-                tours = filter_for_sa_date(guides_notif)
+                tours, errors = filter_for_sa_date(guides_notif)
                 day = 'завтра'
             elif is_admin(user_id):
-                tours = filter_by_date(admins_notif)
+                tours, errors = filter_by_date(admins_notif)
                 day = 'послезавтра'
             elif is_guide(user_id):
-                tours = filter_by_date(guides_notif, guide=user_id)
+                tours, errors = filter_by_date(guides_notif, guide=user_id)
                 day = 'завтра'
             else:
                 continue
@@ -33,11 +33,11 @@ async def check_tours(bot):
             if not tours:
                 continue
 
-            # Формируем сообщение
-            response = (f"🔔 На {day} запланировано экскурсий: {len(tours)}.\n"
+            # Message
+            response = (f"🔔 На {day} запланировано экскурсий: {len(tours + errors)}.\n"
                         f"Проверьте расписание.")
 
-            # Отправляем сообщение пользователю
+            # Send message
             await bot.send_message(chat_id=user_id, text=response, parse_mode="HTML")
 
         except Exception as e:
