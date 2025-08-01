@@ -39,9 +39,9 @@ async def send_tours_list(tours: list[dict], errors: list[str], message: Message
             await message.answer(tour_info)
 
         if start_date and end_date:
-            await message.answer(f"С {start_date} по {end_date} найдено экскурсий: {len(tours + errors)}.")
+            await message.answer(f"С {start_date} по {end_date} найдено экскурсий: {len(tours) + len(errors)}.")
         else:
-            await message.answer(f'Всего экскурсий: {len(tours + errors)}')
+            await message.answer(f'Всего экскурсий: {len(tours) + len(errors)}')
 
     # Отправка предупреждения, если есть ошибки
     if errors:

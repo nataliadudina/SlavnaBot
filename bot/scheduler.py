@@ -34,7 +34,7 @@ async def check_tours(bot):
                 continue
 
             # Message
-            response = (f"🔔 На {day} запланировано экскурсий: {len(tours + errors)}.\n"
+            response = (f"🔔 На {day} запланировано экскурсий: {len(tours) + len(errors)}.\n"
                         f"Проверьте расписание.")
 
             # Send message
