@@ -30,7 +30,7 @@ async def check_tours(bot):
             else:
                 continue
 
-            if not tours:
+            if not tours and not errors:
                 continue
 
             # Message

@@ -167,7 +167,7 @@ def get_tripster_and_slavna_tours(guide: int, slavna_data: list[dict], columns: 
 
 
 # =================== Condition filtering ===================
-def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None) -> tuple[list[dict], list[str]] | None:
+def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None) -> tuple[list[dict], list[str]]:
     """
     Filters data from Google Sheet by date.
     Can filter by guide if guide ID is provided.
@@ -181,7 +181,7 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
        guide (Optional[int]): Guide ID for filtering their tours.
 
     Returns:
-       Optional[tuple[list[dict], list[str]]]: Filtered data and errors in Time column or None in case of exception.
+       tuple[list[dict], list[str]]: Filtered data and errors in Time column.
     """
     try:
         data = get_orders()
@@ -204,11 +204,11 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
         return tours, errors
     except Exception as e:
         logger.error(f"Ошибка при загрузке или фильтрации данных: {e}")
-        return None
+        return [], []
 
 
 def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date] = None, guide: Optional[int] = None) \
-        -> tuple[list[dict], list[str]] | None:
+        -> tuple[list[dict], list[str]]:
     """
     Filters data from Google Sheet for a specified period.
     Can filter by guide if guide ID is provided.
@@ -223,7 +223,7 @@ def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date]
        end_date (Optional[date], optional): End date for filtering. If not specified, end of list is used.
 
     Returns:
-       Optional[tuple[list[dict], list[str]]]: Filtered data and errors in Time column or None in case of exception.
+       tuple[list[dict], list[str]]: Filtered data and errors in Time column.
     """
     try:
         # Getting data from a Google sheet
@@ -266,7 +266,7 @@ def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date]
                 return tours, errors
     except Exception as e:
         logger.error(f"Ошибка при загрузке или фильтрации данных: {e}")
-        return None
+        return [], []
 
 
 # =================== Super Admin ===================
@@ -324,7 +324,7 @@ def filter_for_sa_date(due_date: Optional[date] = None) -> tuple[list[dict], lis
 
 
 def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[date] = None) \
-        -> tuple[list[dict], list[str]] | None:
+        -> tuple[list[dict], list[str]]:
     """
     Filters data from Google Sheet for a specified period for superadmin: combines tours from Slava and two guides.
 
@@ -336,7 +336,7 @@ def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[d
        end_date (Optional[date], optional): End date for filtering. If not specified, end of list is used.
 
     Returns:
-       Optional[List[Dict[str, Any]]]: Filtered data or None in case of error.
+       List[Dict[str, Any]]: Filtered data.
     """
 
     # Columns from personal Tripsters (brief)
