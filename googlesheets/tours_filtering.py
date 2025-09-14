@@ -18,11 +18,13 @@ env.read_env('.env')
 zabava = int(env('ZABAVA'))
 agafya = int(env('AGAFYA'))
 feofaniya = int(env('FEOFANIYA'))
+miroslava = int(env('MIROSLAVA'))
 
 GUIDES = {
     zabava: {'name': 'Забава', 'surname': 'Путятина'},
-    agafya: {'name': 'Агафья', 'surname': 'Селиванова'},
-    feofaniya: {'name': 'Феофания', 'surname': 'Маркова'}
+    agafya: {'name': 'Агафья', 'surname': 'Ясна'},
+    feofaniya: {'name': 'Феофания', 'surname': 'Маркова'},
+    miroslava: {'name': 'Мирослава', 'surname': 'Вейкова'}
 }
 
 
