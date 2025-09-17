@@ -19,7 +19,7 @@ def load_bot_config(path: str | None = None) -> TgBot:
         token=env('BOT_TOKEN'),
         super_admin=int(env('SUPER_ADMIN')),
         admin_ids=list(map(int, env.list('ADMIN_IDS'))),
-        guide_ids=list(map(int, env.list('GUIDS_IDS')))
+        guide_ids=list(map(int, env.list('GUIDE_IDS')))
     )
 
 
