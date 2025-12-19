@@ -19,12 +19,21 @@ zabava = int(env('ZABAVA'))
 agafya = int(env('AGAFYA'))
 feofaniya = int(env('FEOFANIYA'))
 miroslava = int(env('MIROSLAVA'))
+ulyana = int(env('ULYANA'))
+stesha = int(env('STESHA'))
+andrey = int(env('ANDREY'))
+zavid = int(env('ZAVID'))
+
 
 GUIDES = {
     zabava: {'name': 'Забава', 'surname': 'Путятина'},
     agafya: {'name': 'Агафья', 'surname': 'Ясна'},
     feofaniya: {'name': 'Феофания', 'surname': 'Маркова'},
-    miroslava: {'name': 'Мирослава', 'surname': 'Вейкова'}
+    miroslava: {'name': 'Мирослава', 'surname': 'Вейкова'},
+    ulyana: {'name': 'Ульяна', 'surname': ''},
+    stesha: {'name': 'Анжела', 'surname': 'Стеша'},
+    andrey: {'name': 'Андрей', 'surname': 'Ондрейка'},
+    zavid: {'name': 'Женя', 'surname': 'Мишка'}
 }
 
 

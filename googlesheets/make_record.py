@@ -17,7 +17,7 @@ def parse_record(data: list) -> list:
         6: 'История в двух голосах',
         7: 'Величание'
     }
-    # Mandatory data
+    # Required data
     tour_date = data[0]
     tour_time = data[1]
 
@@ -77,7 +77,7 @@ def find_insert_index(data, new_datetime) -> int:
     return len(data) + 1
 
 
-def add_record(record_data):
+def add_record(record_data, highlight: bool = False):
     """ Inserts new record into Google Sheets."""
     data = SHEET.get_all_values()
 
@@ -89,8 +89,9 @@ def add_record(record_data):
     SHEET.insert_row(new_record, insert_index)
 
     # Highlight the record
-    SHEET.format(f"A{insert_index}:L{insert_index}", {
-        "backgroundColor": {
-            "red": 1.0, "green": 0.95, "blue": 0.8
-        }
-    })
+    if highlight:
+        SHEET.format(f"A{insert_index}:L{insert_index}", {
+            "backgroundColor": {
+                "red": 1.0, "green": 0.95, "blue": 0.8
+            }
+        })
