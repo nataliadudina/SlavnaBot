@@ -3,12 +3,14 @@ import logging
 import aiosqlite
 import sqlite3
 
+from config import config
+
 logger = logging.getLogger(__name__)
 
 
 def get_users() -> list:
-    """Возвращает список user_id всех пользователей из БД"""
-    conn = sqlite3.connect('slavna.db')
+    """Returns a list of user_ids for all users in the database."""
+    conn = sqlite3.connect(config.db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT user_id FROM users')
     users = [row[0] for row in cursor.fetchall()]
@@ -18,10 +20,10 @@ def get_users() -> list:
 
 async def add_to_db(user_id: int, username: str) -> None:
     """
-    Функция создания таблицы users и сохранения telegram id и username пользователей
-    с генерацией даты добавления.
+    Creates the users table and stores the user's Telegram ID and username
+    along with the addition date.
     """
-    async with aiosqlite.connect('slavna.db') as db:
+    async with aiosqlite.connect(config.db_path) as db:
         await db.execute("""
         CREATE TABLE IF NOT EXISTS users (
         user_id BIGINT, 
@@ -31,7 +33,7 @@ async def add_to_db(user_id: int, username: str) -> None:
         )
         """)
 
-        # проверка, что пользователя ещё нет в бд
+        # check that user hasn't been already added
         check_result = await db.execute(
             "SELECT COUNT(*) FROM users WHERE user_id = ?", (user_id,)
         )
@@ -43,16 +45,14 @@ async def add_to_db(user_id: int, username: str) -> None:
         await db.execute("INSERT INTO users (user_id, username) VALUES (?, ?)",
                          (user_id, username)
                          )
-        # Уровень ERROR, чтобы пришло оповещение в тг о добавлении нового пользователя
+        # ERROR level to get notification about new user
         logger.error(f'User {username} with user id {user_id} has been added to db "users"')
         await db.commit()
 
 
 async def update_user_role(user_id: int, role: str) -> None:
-    """
-    Обновляет роль пользователя в базе данных.
-    """
-    async with aiosqlite.connect('slavna.db') as db:
+    """ Updates a user's role in the database. """
+    async with aiosqlite.connect(config.db_path) as db:
         await db.execute(
             "UPDATE users SET role = ? WHERE user_id = ?", (role, user_id)
         )
@@ -61,8 +61,8 @@ async def update_user_role(user_id: int, role: str) -> None:
 
 
 async def get_user_role(user_id: int) -> str:
-    """Функция для получения роли пользователя из базы данных."""
-    async with aiosqlite.connect('slavna.db') as db:
+    """ Retrieves a user's role from the database. """
+    async with aiosqlite.connect(config.db_path) as db:
         result = await db.execute("SELECT role FROM users WHERE user_id = ?", (user_id,))
         row = await result.fetchone()
         return row[0] if row else 'user'

@@ -10,32 +10,27 @@ from aiogram.fsm.storage.memory import MemoryStorage
 import bot.handlers
 from bot.handlers import handlers, date_handlers, extra_handlers, period_handlers
 from bot.scheduler import setup_scheduler
-from config import bot_config
+from config import config
 from logging_config import setup_logging
 
-# передача переменных окружения
-config = bot_config
-
-# Инициализация бота и диспетчер
 bot = Bot(token=config.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 
-# Основной цикл бота
 async def main():
-    # Настройка логирования
     setup_logging()
     logger = logging.getLogger(__name__)
 
-    # Регистрация роутеров
+    bot_info = await bot.get_me()
+    logger.info('Starting bot: @%s', bot_info.username)
+
+    # Routers
     dp.include_router(date_handlers.router)
     dp.include_router(period_handlers.router)
     dp.include_router(extra_handlers.router)
     dp.include_router(handlers.router)
 
-    # await set_main_menu(bot)
-    # commands = await bot.get_my_commands()
     try:
         await dp.start_polling(bot, timeout=60)
     except Exception as e:
@@ -43,13 +38,15 @@ async def main():
 
 
 async def main_wrapper():
-    """Запускаем проверку экскурсий и бота одновременно"""
     setup_scheduler(bot)
     await main()
 
 
 if __name__ == '__main__':
     try:
+        logging.info('Bot process started')
         asyncio.run(main_wrapper())
     except KeyboardInterrupt:
         logging.info('Bot is turned down.')
+    except Exception:
+        logging.exception('Fatal error during bot execution')

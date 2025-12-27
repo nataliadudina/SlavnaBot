@@ -48,7 +48,7 @@ async def send_tours_list(tours: list[dict], errors: list[str], message: Message
         errors_list = '\n'.join(errors)
         await message.answer(
             f"⚠️ Найдены ошибки в записи для экскурсий:\n"
-            f"{errors_list}.\nСообщите, пожалуйста, администратору."
+            f"{errors_list}.\n<b>Сообщите, пожалуйста, администратору</b>."
         )
 
 

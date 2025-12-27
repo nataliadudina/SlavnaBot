@@ -1,27 +1,27 @@
-from dataclasses import dataclass
+from types import SimpleNamespace
 
 from environs import Env
 
 
-@dataclass
-class TgBot:
-    token: str  # Токен для доступа к телеграм-боту
-    super_admin: int  # id суперадмина
-    admin_ids: list[int]  # Список id администраторов бота
-    guide_ids: list[int]  # Список гидов
+class Config(SimpleNamespace):
+    token: str
+    super_admin: int
+    admin_ids: list[int]
+    guide_ids: list[int]
+    db_path: str
 
 
-def load_bot_config(path: str | None = None) -> TgBot:
+def load_config(path: str | None = None) -> Config:
     env: Env = Env()
     env.read_env(path)
 
-    return TgBot(
+    return Config(
         token=env('BOT_TOKEN'),
-        super_admin=int(env('SUPER_ADMIN')),
-        admin_ids=list(map(int, env.list('ADMIN_IDS'))),
-        guide_ids=list(map(int, env.list('GUIDE_IDS')))
+        super_admin=env.int('SUPER_ADMIN'),
+        admin_ids=env.list('ADMIN_IDS', subcast=int),
+        guide_ids=env.list('GUIDE_IDS', subcast=int),
+        db_path=env('BOT_DB_PATH', default='slavna.db'),
     )
 
 
-# Инициализация конфигурации
-bot_config = load_bot_config('.env')
+config = load_config('.env')

@@ -3,15 +3,16 @@ from datetime import date, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot.db.db import get_users
-from bot.filters.filters import is_superadmin, is_admin, is_guide
+from bot.db import get_users
+from bot.filters import is_superadmin, is_admin, is_guide
+from bot.keyboards import check_btn
 from googlesheets.tours_filtering import filter_for_sa_date, filter_by_date
 
 logger = logging.getLogger()
 
 
 async def check_tours(bot):
-    """ Checks for tour availability for tomorrow and sends notifications to users """
+    """ Checks nearest tours and sends notifications to admins and guides. """
     admins_notif = date.today() + timedelta(days=2)
     guides_notif = date.today() + timedelta(days=1)
     users = get_users()
@@ -33,15 +34,13 @@ async def check_tours(bot):
             if not tours and not errors:
                 continue
 
-            # Message
             response = (f"🔔 На {day} запланировано экскурсий: {len(tours) + len(errors)}.\n"
                         f"Проверьте расписание.")
 
-            # Send message
-            await bot.send_message(chat_id=user_id, text=response, parse_mode="HTML")
+            await bot.send_message(chat_id=user_id, text=response, reply_markup=check_btn, parse_mode="HTML")
 
         except Exception as e:
-            logger.error(f"Ошибка при отправке уведомления {user_id}: {e}")
+            logger.error(f"Error while sending notification to user {user_id}: {e}")
 
 
 def setup_scheduler(bot):

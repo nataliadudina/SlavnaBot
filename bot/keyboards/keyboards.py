@@ -117,3 +117,9 @@ tripster_keyboard = InlineKeyboardMarkup(
         [late_orders]
     ]
 )
+
+check_btn = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Посмотреть 👀", callback_data="check")]
+    ]
+)

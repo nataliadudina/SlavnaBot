@@ -1,40 +1,40 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from config import bot_config
+from config import config
 
 
 def is_superadmin(user_id):
-    """ Проверяет, является ли пользователь супер админом."""
-    return user_id == bot_config.super_admin
+    """ Checks whether the user is a super admin. """
+    return user_id == config.super_admin
 
 
 def is_admin(user_id):
-    """ Проверяет, является ли пользователь админом."""
-    return user_id in bot_config.admin_ids
+    """ Checks whether the user is an admin. """
+    return user_id in config.admin_ids
 
 
 def is_guide(user_id):
-    """ Проверяет, является ли пользователь гидом."""
-    return user_id in bot_config.guide_ids
+    """ Checks whether the user is a guide. """
+    return user_id in config.guide_ids
 
 
 class IsAdmin(BaseFilter):
-    """Фильтрует пользователей, которые состоят в группе администраторов."""
+    """ Filters users who belong to the administrators group. """
 
     def __init__(self):
-        self.admin_ids = bot_config.admin_ids
+        self.admin_ids = config.admin_ids
 
     async def __call__(self, message: Message) -> bool:
         return message.from_user.id in self.admin_ids
 
 
 class IsAdminOrGuide(BaseFilter):
-    """Фильтрует пользователей, которые состоят в группе администраторов или гидов."""
+    """ Filters users who belong to either the administrators or guides groups. """
 
     def __init__(self):
-        self.admin_ids = bot_config.admin_ids
-        self.guide_ids = bot_config.guide_ids
+        self.admin_ids = config.admin_ids
+        self.guide_ids = config.guide_ids
 
     async def __call__(self, message: Message) -> bool:
         return message.from_user.id in self.admin_ids or message.from_user.id in self.guide_ids

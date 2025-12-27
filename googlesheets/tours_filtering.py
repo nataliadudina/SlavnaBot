@@ -327,11 +327,11 @@ def filter_for_sa_date(due_date: Optional[date] = None) -> tuple[list[dict], lis
     tour_date = due_date if due_date else date.today()
 
     # Excursions from Slavna
-    slavna_tours, _ = filter_by_date(tour_date)
+    slavna_tours, slavna_errors = filter_by_date(tour_date)
 
     all_tours, errors = get_data_for_sa(slavna_tours, columns, tour_date)
 
-    return all_tours, errors
+    return all_tours, slavna_errors + errors
 
 
 def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[date] = None) \
@@ -354,10 +354,10 @@ def filter_for_sa_period(start_date: Optional[date] = None, end_date: Optional[d
     columns = get_brief_mpcols()
 
     # Excursions from Slavna
-    slavna_tours, _ = filter_by_period(start_date=start_date, end_date=end_date)
+    slavna_tours, slavna_errors = filter_by_period(start_date=start_date, end_date=end_date)
 
     if start_date and end_date:
         tours, errors = get_data_for_sa(slavna_tours, columns, start_date, end_date)
-        return tours, errors
+        return tours, errors + slavna_errors
     tours, errors = get_data_for_sa(slavna_tours, columns, date.today(), from_today=True)
-    return tours, errors
+    return tours, errors + slavna_errors
