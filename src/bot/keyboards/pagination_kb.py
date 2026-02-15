@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.texts.staff_texts import pagination
+from src.bot.texts.staff_texts import pagination
 
 
 # Функция, генерирующая клавиатуру для страниц

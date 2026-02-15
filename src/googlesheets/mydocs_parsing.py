@@ -1,24 +1,16 @@
 import logging
-import os
 
 import gspread
 from environs import Env
-from google.oauth2.service_account import Credentials
+
+from src.config import config
 
 env = Env()
 env.read_env('.env')
 
 logger = logging.getLogger(__name__)
 
-# Path to JSON with keys
-CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), 'google_creds.json')
-
-# List of authorization scopes
-SCOPES = [env('SCOPES')]
-
-# Authorization set up
-credentials = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
-gc = gspread.authorize(credentials)
+gc = gspread.service_account(filename=config.credential_file)
 
 # Opening a Google Sheet via a links
 sheet_urls = {

@@ -2,8 +2,8 @@ from datetime import date, datetime, timedelta
 
 from environs import Env
 
-from tripster.services import send_message
-from tripster.class_tparser import TParser
+from src.tripster.services import send_message
+from src.tripster.class_tparser import TParser
 
 """
 Основной скрипт для парсера tripster.

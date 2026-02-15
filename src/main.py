@@ -7,11 +7,10 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-import bot.handlers
-from bot.handlers import handlers, date_handlers, extra_handlers, period_handlers
-from bot.scheduler import setup_scheduler
-from config import config
-from logging_config import setup_logging
+from .bot.handlers import extra_handlers, period_handlers, date_handlers, handlers
+from .bot.scheduler import setup_scheduler
+from .config import config
+from .logging_config import setup_logging
 
 bot = Bot(token=config.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()

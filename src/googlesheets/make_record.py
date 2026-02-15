@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from googlesheets.docs_parsing import worksheet
+from src.googlesheets.docs_parsing import worksheet
 
 SHEET = worksheet
 

@@ -1,7 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from config import config
+from src.config import config
 
 
 def is_superadmin(user_id):

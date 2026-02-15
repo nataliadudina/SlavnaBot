@@ -4,7 +4,7 @@ from logging.config import dictConfig
 
 import requests
 
-from config import config
+from src.config import config
 
 super_admin = config.super_admin
 bot_token = config.token

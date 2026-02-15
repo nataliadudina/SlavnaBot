@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 import requests
 
-from tripster.utils import form_data_for_message, get_all_orders
+from src.tripster.utils import form_data_for_message, get_all_orders
 
 logging.basicConfig(level=logging.INFO)
 

@@ -5,8 +5,8 @@ from typing import Optional
 
 from environs import Env
 
-from googlesheets.docs_parsing import get_brief_columns, get_guides_columns, get_orders, get_extended_columns
-from googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders, get_brief_mpcols
+from src.googlesheets.docs_parsing import get_brief_columns, get_guides_columns, get_orders, get_extended_columns
+from src.googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders, get_brief_mpcols
 
 logger = logging.getLogger(__name__)
 

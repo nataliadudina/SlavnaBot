@@ -3,7 +3,7 @@ import logging
 
 from pywhatkit import sendwhatmsg_instantly
 
-from tripster.texts import form_message
+from src.tripster.texts import form_message
 
 logger = logging.getLogger(__name__)
 

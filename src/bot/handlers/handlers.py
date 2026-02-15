@@ -5,11 +5,11 @@ from aiogram.filters import Command, CommandStart, StateFilter, or_f
 from aiogram.fsm.state import default_state
 from aiogram.types import Message
 
-import bot.keyboards.keyboards as kb
-from bot.db.db import add_to_db, update_user_role
-from bot.filters.filters import is_admin, is_guide
-from bot.texts.other_texts import gen_answer, cmd_texts
-from bot.texts.staff_texts import replies
+import src.bot.keyboards.keyboards as kb
+from src.bot.db.db import add_to_db, update_user_role
+from src.bot.filters.filters import is_admin, is_guide
+from src.bot.texts.other_texts import gen_answer, cmd_texts
+from src.bot.texts.staff_texts import replies
 
 router = Router()
 
@@ -21,7 +21,7 @@ async def cmd_start(message: Message):
     """ При запуске бота создаётся клавиатура с reply buttons. """
     user_id = message.from_user.id
     name = message.from_user.first_name or message.from_user.username
-    username = message.from_user.username or 'Unknown'
+    username = message.from_user.username or message.from_user.first_name
 
     # Добавляем пользователя в базу данных (если его там нет)
     await add_to_db(user_id, username)

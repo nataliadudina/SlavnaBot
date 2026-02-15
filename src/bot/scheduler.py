@@ -3,10 +3,10 @@ from datetime import date, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from bot.db import get_users
-from bot.filters import is_superadmin, is_admin, is_guide
-from bot.keyboards import check_btn
-from googlesheets.tours_filtering import filter_for_sa_date, filter_by_date
+from src.bot.db import get_users
+from src.bot.filters import is_superadmin, is_admin, is_guide
+from src.bot.keyboards import check_btn
+from src.googlesheets.tours_filtering import filter_for_sa_date, filter_by_date
 
 logger = logging.getLogger()
 

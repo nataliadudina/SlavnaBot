@@ -9,11 +9,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
-import bot.keyboards.keyboards as kb
-from bot.filters.filters import is_admin, is_guide, is_superadmin
-from bot.keyboards.calendar import generate_calendar
-from bot.texts.staff_texts import buttons, tour_texts
-from googlesheets.tours_filtering import filter_by_period, filter_for_sa_period
+import src.bot.keyboards.keyboards as kb
+from src.bot.filters.filters import is_admin, is_guide, is_superadmin
+from src.bot.keyboards.calendar import generate_calendar
+from src.bot.texts.staff_texts import buttons, tour_texts
+from src.googlesheets.tours_filtering import filter_by_period, filter_for_sa_period
 
 router = Router()
 

@@ -6,12 +6,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 
-import bot.keyboards as kb
-from bot.filters import IsAdminOrGuide, is_admin, is_guide, is_superadmin
-from bot.keyboards.calendar import generate_calendar
-from bot.keyboards.pagination_kb import create_pagination_keyboard
-from bot.texts.staff_texts import buttons, replies, tour_texts
-from googlesheets.tours_filtering import filter_by_date, filter_for_sa_date
+import src.bot.keyboards as kb
+from src.bot.filters import IsAdminOrGuide, is_admin, is_guide, is_superadmin
+from src.bot.keyboards.calendar import generate_calendar
+from src.bot.keyboards.pagination_kb import create_pagination_keyboard
+from src.bot.texts.staff_texts import buttons, replies, tour_texts
+from src.googlesheets.tours_filtering import filter_by_date, filter_for_sa_date
 
 router = Router()
 router.message.filter(IsAdminOrGuide())
