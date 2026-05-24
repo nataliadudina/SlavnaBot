@@ -24,7 +24,14 @@ def load_config(path: str | None = None) -> Config:
         admin_ids=env.list('ADMIN_IDS', subcast=int),
         guide_ids=env.list('GUIDE_IDS', subcast=int),
         db_path=env('BOT_DB_PATH', default='data/slavna.db'),
-        credential_file=env('GOOGLE_CREDS')
+        credential_file=env('GOOGLE_CREDS'),
+
+        # email
+        hostname=env('EMAIL_HOST'),
+        port=int(env('EMAIL_PORT')),
+        email_username=env('EMAIL_HOST_USER'),
+        email_password=env('EMAIL_HOST_PASSWORD'),
+        use_tls=env('EMAIL_USE_SSL', 'True') == 'True',
     )
 
 

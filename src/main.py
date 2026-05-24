@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import logging.config
+import os
 
 from aiogram import Dispatcher, Bot
 from aiogram.client.default import DefaultBotProperties
@@ -12,7 +13,13 @@ from .bot.scheduler import setup_scheduler
 from .config import config
 from .logging_config import setup_logging
 
-bot = Bot(token=config.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+from aiogram.client.session.aiohttp import AiohttpSession
+
+proxy = os.getenv('PROXY')
+session = AiohttpSession(proxy=proxy)
+
+
+bot = Bot(token=config.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML), session=session)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 

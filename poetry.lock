@@ -197,6 +197,21 @@ yarl = ">=1.12.0,<2.0"
 speedups = ["Brotli", "aiodns (>=3.2.0)", "brotlicffi"]
 
 [[package]]
+name = "aiohttp-socks"
+version = "0.11.0"
+description = "Proxy connector for aiohttp"
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "aiohttp_socks-0.11.0-py3-none-any.whl", hash = "sha256:9aacce57c931b8fbf8f6d333cf3cafe4c35b971b35430309e167a35a8aab9ec1"},
+    {file = "aiohttp_socks-0.11.0.tar.gz", hash = "sha256:0afe51638527c79077e4bd6e57052c87c4824233d6e20bb061c53766421b10f0"},
+]
+
+[package.dependencies]
+aiohttp = ">=3.10.0"
+python-socks = {version = ">=2.4.3,<3.0.0", extras = ["asyncio"]}
+
+[[package]]
 name = "aiosignal"
 version = "1.4.0"
 description = "aiosignal: a list of registered asynchronous callbacks"
@@ -210,6 +225,21 @@ files = [
 [package.dependencies]
 frozenlist = ">=1.1.0"
 typing-extensions = {version = ">=4.2", markers = "python_version < \"3.13\""}
+
+[[package]]
+name = "aiosmtplib"
+version = "5.1.0"
+description = "asyncio SMTP client"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "aiosmtplib-5.1.0-py3-none-any.whl", hash = "sha256:368029440645b486b69db7029208a7a78c6691b90d24a5332ddba35d9109d55b"},
+    {file = "aiosmtplib-5.1.0.tar.gz", hash = "sha256:2504a23b2b63c9de6bc4ea719559a38996dba68f73f6af4eb97be20ee4c5e6c4"},
+]
+
+[package.extras]
+docs = ["furo (>=2023.9.10)", "sphinx (>=7.0.0)", "sphinx-autodoc-typehints (>=1.24.0)", "sphinx-copybutton (>=0.5.0)"]
+uvloop = ["uvloop (>=0.18)"]
 
 [[package]]
 name = "aiosqlite"
@@ -1838,6 +1868,23 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-socks"
+version = "2.8.1"
+description = "Proxy (SOCKS4, SOCKS5, HTTP CONNECT) client for Python"
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "python_socks-2.8.1-py3-none-any.whl", hash = "sha256:28232739c4988064e725cdbcd15be194743dd23f1c910f784163365b9d7be035"},
+    {file = "python_socks-2.8.1.tar.gz", hash = "sha256:698daa9616d46dddaffe65b87db222f2902177a2d2b2c0b9a9361df607ab3687"},
+]
+
+[package.extras]
+anyio = ["anyio (>=3.3.4,<5.0.0)"]
+asyncio = ["async-timeout (>=4.0)"]
+curio = ["curio (>=1.4)"]
+trio = ["trio (>=0.24)"]
+
+[[package]]
 name = "python3-xlib"
 version = "0.15"
 description = "Python3 X Library"
@@ -2184,4 +2231,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "552296894c7694797c8f36a4fcc7587ca036a62b7154aa3feb22328adfe174fe"
+content-hash = "b7eccc4d0fbe5b6f999d77be9e05dd1a10d8bb7b80de1935bc9c2f8ff159a039"

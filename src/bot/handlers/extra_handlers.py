@@ -449,11 +449,10 @@ async def edit_tours_list(
     tours = await get_tours_by_type(tour_type)
 
     if not tours:
-        await callback.message.edit_text(
+        await callback.answer(
             'Экскурсий этого типа пока нет.',
-            reply_markup=kb.edit_tour_type,
+            show_alert=True
         )
-        await callback.answer()
         return
 
     await state.clear()
@@ -589,6 +588,13 @@ async def delete_tour_menu(
     await state.clear()
 
     tours = await get_all_tours()
+
+    if not tours:
+        await callback.answer(
+            'Нет экскурсий.',
+            show_alert=True
+        )
+        return
 
     await callback.message.edit_text(
         'Что удалить?',

@@ -32,6 +32,7 @@ async def add_to_db(user_id: int, username: str) -> None:
             user_id BIGINT, 
             username VARCHAR(50), 
             role VARCHAR(5) DEFAULT 'user',
+            email VARCHAR(100),
             date TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -69,6 +70,15 @@ async def get_user_role(user_id: int) -> str:
         result = await db.execute("SELECT role FROM users WHERE user_id = ?", (user_id,))
         row = await result.fetchone()
         return row[0] if row else 'user'
+
+
+async def get_user_email(user_id) -> str | None:
+    async with aiosqlite.connect(config.db_path) as db:
+        async with db.execute(
+            "SELECT email FROM users WHERE user_id = ?", (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row and row[0] else None
 
 
 # =========================

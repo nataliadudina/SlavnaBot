@@ -23,17 +23,19 @@ ulyana = int(env('ULYANA'))
 stesha = int(env('STESHA'))
 andrey = int(env('ANDREY'))
 zavid = int(env('ZAVID'))
+olga = int(env('OLGA'))
 
 
 GUIDES = {
-    zabava: {'name': 'Забава', 'surname': 'Путятина'},
-    agafya: {'name': 'Агафья', 'surname': 'Ясна'},
-    feofaniya: {'name': 'Феофания', 'surname': 'Маркова'},
-    miroslava: {'name': 'Мирослава', 'surname': 'Вейкова'},
-    ulyana: {'name': 'Ульяна', 'surname': ''},
-    stesha: {'name': 'Анжела', 'surname': 'Стеша'},
-    andrey: {'name': 'Андрей', 'surname': 'Ондрейка'},
-    zavid: {'name': 'Женя', 'surname': 'Мишка'}
+    zabava: {'name': 'Путятина', 'stage_name': 'Забава'},
+    agafya: {'name': 'Агафья', 'stage_name': 'Ясна'},
+    feofaniya: {'name': 'Маркова', 'stage_name': 'Феофания'},
+    miroslava: {'name': 'Вейкова', 'stage_name': 'Мирослава'},
+    ulyana: {'name': 'Ульяна', 'stage_name': ''},
+    stesha: {'name': 'Анжела', 'stage_name': 'Стеша'},
+    andrey: {'name': 'Андрей', 'stage_name': 'Ондрейка'},
+    zavid: {'name': 'Женя', 'stage_name': 'Мишка'},
+    olga: {'name': 'Ольга', 'stage_name': 'Хавронья'}
 }
 
 
@@ -83,7 +85,7 @@ def guide_mentioned_with_typos(row: dict, guide_id: int) -> bool:
     for target in targets:
         words = target.strip().split()
         if any(
-                get_close_matches(word, [guide['name'], guide['surname']], cutoff=0.7)
+                get_close_matches(word, [guide['name'], guide['stage_name']], cutoff=0.7)
                 for word in words
         ):
             return True
