@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "docker-compose.yml,Dockerfile,requirements.txt,src/"
-          target: /app
+          target: /home/slavna/SlavnaBot
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
