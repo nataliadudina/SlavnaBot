@@ -2,10 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN pip install poetry==1.7.1
-
 COPY pyproject.toml poetry.lock /app/
-RUN poetry config virtualenvs.create false && \
+
+RUN pip install poetry==1.7.1 --timeout 120 && \
+    poetry config virtualenvs.create false && \
     poetry install --no-dev --no-interaction --no-ansi
 
 VOLUME ["/app/data"]
