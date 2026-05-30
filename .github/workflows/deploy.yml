@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug vars
+        run: |
+          echo "HOST=${{ vars.SERVER_HOST }}"
+          echo "USER=${{ vars.SERVER_USER }}"
+
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
