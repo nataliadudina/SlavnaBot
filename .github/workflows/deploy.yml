@@ -29,6 +29,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /app
+            cd /home/slavna/SlavnaBot
             docker compose down
             docker compose up -d --build
