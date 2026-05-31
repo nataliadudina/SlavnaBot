@@ -83,7 +83,7 @@ async def notify_email():
 
             day, tours, errors = result
             text = build_message(day, tours, errors, extended=True)
-            email = get_user_email(user_id)
+            email = await get_user_email(user_id)
 
             if not email:
                 continue
