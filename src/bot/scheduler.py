@@ -111,5 +111,5 @@ async def notify_email():
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(notify_telegram, 'cron', hour=11, minute=0, args=[bot])
-    scheduler.add_job(notify_email, 'cron', hour=23, minute=59)
+    scheduler.add_job(notify_email, 'cron', hour=19, minute=0)
     scheduler.start()
