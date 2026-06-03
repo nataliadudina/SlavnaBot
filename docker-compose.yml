@@ -1,7 +1,6 @@
 services:
   slavna_bot:
     container_name: slavna_bot
-    network_mode: "host"
     build: .
     env_file:
       - .env
