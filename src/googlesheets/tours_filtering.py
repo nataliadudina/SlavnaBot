@@ -101,7 +101,7 @@ def filter_data(
         guide_id: Optional[int] = None
 ) -> list[dict]:
     """
-    Universal function for filtering Slavna excursions by date or specific period.
+    Universal function for filtering excursions by date or specific period.
     Can filter by guide if guide_id is passed.
     """
 
@@ -197,26 +197,35 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
        tuple[list[dict], list[str]]: Filtered data and errors in Time column.
     """
     try:
+        logger.info(f"filter_by_date called: due_date={due_date}, guide={guide}")
         data = get_orders()
         tour_date = due_date or date.today()
 
         if guide:
             columns = get_guides_columns()
+            logger.info(f"Guide's columns: {columns}")
+
             if guide in (feofaniya, zabava):
                 # For Феофания & Забава
+                logger.info(f"Guide {guide} — branch get_tripster_and_slavna_tours")
                 tours, errors = get_tripster_and_slavna_tours(guide, data, columns, start_date=tour_date)
+                logger.info(f"get_tripster_and_slavna_tours returns {len(tours)} tours, errors: {len(errors)}")
                 return tours, errors
+
             # For other guids
             filtered_data = filter_data(data, columns, tour_date, guide_id=guide)
             tours, errors = sort_tours(filtered_data)
             return tours, errors
+
         # For admins
+        logger.info("No guide request — admin branch")
         columns = get_extended_columns()
         filtered_data = filter_data(data, columns, tour_date)
+        logger.info(f"filter_data (admin) returns {len(filtered_data)} lines")
         tours, errors = sort_tours(filtered_data)
         return tours, errors
     except Exception as e:
-        logger.error(f"Ошибка при загрузке или фильтрации данных: {e}")
+        logger.exception(f"Ошибка при загрузке или фильтрации данных: guide={guide}, due_date={due_date}")
         return [], []
 
 
@@ -278,7 +287,7 @@ def filter_by_period(start_date: Optional[date] = None, end_date: Optional[date]
                 tours, errors = sort_tours(filtered_data)
                 return tours, errors
     except Exception as e:
-        logger.error(f"Ошибка при загрузке или фильтрации данных: {e}")
+        logger.exception(f'Ошибка при загрузке или фильтрации данных: guide={guide}')
         return [], []
 
 

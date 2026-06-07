@@ -34,7 +34,9 @@ class TelegramLogsHandler(logging.Handler):
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
         payload = {"chat_id": self.chat_id, "text": message}
         try:
-            requests.post(url, data=payload, timeout=5)
+            response = requests.post(url, data=payload, timeout=5)
+            if not response.ok:
+                sys.stderr.write(f'Telegram API error: {response.status_code} {response.text}\n')
         except Exception as e:
             sys.stderr.write(f'Telegram logging failed: {e}\n')  # feedback without recursion
 
@@ -63,12 +65,21 @@ LOGGING_CONFIG = {
         "level": "INFO",
         "handlers": ["console"],
     },
+    "loggers": {
+        "src": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+    }
 }
 
 
 def setup_logging():
     """Configure application logging."""
     dictConfig(LOGGING_CONFIG)
+
+    sys.stderr.write(f'Setting up Telegram logging: token={bool(config.token)}, chat_id={config.super_admin}\n')
 
     # Custom TelegramLogsHandler
     telegram_handler = TelegramLogsHandler(config.token, config.super_admin)

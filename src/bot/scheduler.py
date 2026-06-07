@@ -58,6 +58,8 @@ def build_message(day: str, tours: list[dict], errors: list[str], extended: bool
 
 
 async def notify_telegram(bot):
+    debug_data = {}
+
     for user_id in get_users():
         try:
             result = build_notification(user_id)
@@ -67,14 +69,22 @@ async def notify_telegram(bot):
             day, tours, errors = result
             text = build_message(day, tours, errors)
 
+            if tours:
+                debug_data[user_id] = len(tours)
+
             await bot.send_message(chat_id=user_id, text=text, reply_markup=check_btn, parse_mode='HTML')
 
         except Exception as e:
-            logger.error(f'Error while sending notification to user {user_id}: {e}')
+            logger.exception(f'Error while sending notification to user {user_id}: {e}')
+
+    summary = '; '.join(f'{uid}: {t} tours' for uid, t in debug_data.items())
+    logger.info(f'Bot notifications summary: {summary}')
 
 
 async def notify_email():
     """Sends email notifications."""
+    debug_data = {}
+
     for user_id in get_users():
         try:
             result = build_notification(user_id)
@@ -95,6 +105,9 @@ async def notify_email():
 
             message.attach(MIMEText(text, 'html'))
 
+            if tours:
+                debug_data[user_id] = len(tours)
+
             await aiosmtplib.send(
                 message,
                 hostname=config.hostname,
@@ -105,7 +118,10 @@ async def notify_email():
             )
 
         except Exception as e:
-            logger.error(f'Error while sending email to {user_id}: {e}')
+            logger.exception(f'Error while sending email to {user_id}: {e}')
+
+        summary = '; '.join(f'{uid}: {t} tours' for uid, t in debug_data.items())
+        logger.info(f'Email notifications summary: {summary}')
 
 
 def setup_scheduler(bot):
