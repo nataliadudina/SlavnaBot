@@ -5,8 +5,8 @@ from typing import Optional
 
 from environs import Env
 
-from src.googlesheets.docs_parsing import get_brief_columns, get_guides_columns, get_orders, get_extended_columns
-from src.googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders, get_brief_mpcols
+from ..googlesheets.docs_parsing import get_brief_columns, get_guides_columns, get_orders, get_extended_columns
+from ..googlesheets.mydocs_parsing import get_m_columns, get_p_columns, get_extra_orders, get_brief_mpcols
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +173,7 @@ def get_tripster_and_slavna_tours(guide: int, slavna_data: list[dict], columns: 
         tripster_tours = filter_data(tripster_data, tripster_columns, start_date=start_date, end_date=end_date)
         slavna_tours = filter_data(slavna_data, columns, start_date=start_date, end_date=end_date,
                                    guide_id=guide)
-    logger.debug(f"Славна: {len(slavna_tours)} экскурсий, Трипстер: {len(tripster_tours)} экскурсий.")
+    logger.info(f"Slavna: {len(slavna_tours)} tours, Tripster: {len(tripster_tours)} tours.")
 
     tours, errors = sort_tours(tripster_tours + slavna_tours)
     return tours, errors
@@ -197,19 +197,18 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
        tuple[list[dict], list[str]]: Filtered data and errors in Time column.
     """
     try:
-        logger.info(f"filter_by_date called: due_date={due_date}, guide={guide}")
+        logger.debug(f"filter_by_date called: due_date={due_date}, guide={guide}")
         data = get_orders()
         tour_date = due_date or date.today()
 
         if guide:
             columns = get_guides_columns()
-            logger.info(f"Guide's columns: {columns}")
 
             if guide in (feofaniya, zabava):
                 # For Феофания & Забава
-                logger.info(f"Guide {guide} — branch get_tripster_and_slavna_tours")
+                logger.debug(f"Guide {guide} — branch get_tripster_and_slavna_tours")
                 tours, errors = get_tripster_and_slavna_tours(guide, data, columns, start_date=tour_date)
-                logger.info(f"get_tripster_and_slavna_tours returns {len(tours)} tours, errors: {len(errors)}")
+                logger.debug(f"get_tripster_and_slavna_tours returns {len(tours)} tours, errors: {len(errors)}")
                 return tours, errors
 
             # For other guids
@@ -218,10 +217,10 @@ def filter_by_date(due_date: Optional[date] = None, guide: Optional[int] = None)
             return tours, errors
 
         # For admins
-        logger.info("No guide request — admin branch")
+        logger.debug("No guide request — admin branch")
         columns = get_extended_columns()
         filtered_data = filter_data(data, columns, tour_date)
-        logger.info(f"filter_data (admin) returns {len(filtered_data)} lines")
+        logger.debug(f"filter_data (admin) returns {len(filtered_data)} lines")
         tours, errors = sort_tours(filtered_data)
         return tours, errors
     except Exception as e:
@@ -311,7 +310,7 @@ def get_data_for_sa(slavna_tours: list[dict],
     else:
         tripster_tours = filter_data(tripster_data, columns, start_date=start_date, end_date=end_date)
 
-    logger.debug(f"Славна: {len(slavna_tours)} экскурсий, Трипстер: {len(tripster_tours)} экскурсий.")
+    logger.debug(f"Slavna: {len(slavna_tours)} tours, Tripster: {len(tripster_tours)} tours.")
     tours, errors = sort_tours(tripster_tours + slavna_tours)
     return tours, errors
 

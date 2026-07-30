@@ -6,12 +6,12 @@ from email.mime.text import MIMEText
 import aiosmtplib
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from src.bot.db import get_users
-from src.bot.db.db import get_user_email
-from src.bot.filters import is_superadmin, is_admin, is_guide
-from src.bot.keyboards import check_btn
-from src.config import config
-from src.googlesheets.tours_filtering import filter_for_sa_date, filter_by_date
+from ..bot.db import get_users
+from ..bot.db.db import get_user_email
+from ..bot.filters import is_superadmin, is_admin, is_guide
+from ..bot.keyboards import check_btn
+from ..config import config
+from ..googlesheets.tours_filtering import filter_for_sa_date, filter_by_date, GUIDES
 
 logger = logging.getLogger()
 
@@ -75,7 +75,7 @@ async def notify_telegram(bot):
             await bot.send_message(chat_id=user_id, text=text, reply_markup=check_btn, parse_mode='HTML')
 
         except Exception as e:
-            logger.exception(f'Error while sending notification to user {user_id}: {e}')
+            logger.error(f'Error while sending notification to user {user_id}: {e}')
 
     summary = '; '.join(f'{uid}: {t} tours' for uid, t in debug_data.items())
     logger.info(f'Bot notifications summary: {summary}')
@@ -118,10 +118,12 @@ async def notify_email():
             )
 
         except Exception as e:
-            logger.exception(f'Error while sending email to {user_id}: {e}')
+            logger.error(f'Error while sending email to {user_id}: {e}')
 
-        summary = '; '.join(f'{uid}: {t} tours' for uid, t in debug_data.items())
-        logger.info(f'Email notifications summary: {summary}')
+    guides = [GUIDES[uid] for uid in debug_data.keys()]
+    summary = '; '.join(f'{GUIDES[uid]}: {t} tours' for uid, t in debug_data.items())
+    logger.info(f'Email notifications summary: {summary}')
+    logger.error(f'Emails are sent to {", ".join(guides)}')
 
 
 def setup_scheduler(bot):
