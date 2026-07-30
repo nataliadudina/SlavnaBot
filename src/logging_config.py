@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 from logging.config import dictConfig
 
 import requests
@@ -20,7 +21,6 @@ class TelegramLogsHandler(logging.Handler):
 
     def emit(self, record: logging.LogRecord):
         """ Format and send the log record to Telegram. """
-
         try:
             message = self.format(record)
             self.send_to_telegram(message)
@@ -77,6 +77,9 @@ LOGGING_CONFIG = {
 
 def setup_logging():
     """Configure application logging."""
+    # Set local time
+    logging.Formatter.converter = time.localtime
+
     dictConfig(LOGGING_CONFIG)
 
     sys.stderr.write(f'Setting up Telegram logging: token={bool(config.token)}, chat_id={config.super_admin}\n')
