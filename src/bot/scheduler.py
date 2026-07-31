@@ -120,8 +120,8 @@ async def notify_email():
         except Exception as e:
             logger.error(f'Error while sending email to {user_id}: {e}')
 
-    guides = [GUIDES[uid] for uid in debug_data.keys()]
-    summary = '; '.join(f'{GUIDES[uid]}: {t} tours' for uid, t in debug_data.items())
+    guides = [GUIDES.get(uid, uid) for uid in debug_data.keys()]
+    summary = '; '.join(f'{GUIDES.get(uid, uid)}: {t} tours' for uid, t in debug_data.items())
     logger.info(f'Email notifications summary: {summary}')
     logger.error(f'Emails are sent to {", ".join(guides)}')
 

@@ -1,7 +1,8 @@
 import logging
 import sys
-import time
+from datetime import datetime
 from logging.config import dictConfig
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -75,11 +76,19 @@ LOGGING_CONFIG = {
 }
 
 
+TZ = ZoneInfo("Europe/Moscow")
+
+
+class LocalTimeFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, tz=TZ)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.isoformat(sep=' ', timespec='seconds')
+
+
 def setup_logging():
     """Configure application logging."""
-    # Set local time
-    logging.Formatter.converter = time.localtime
-
     dictConfig(LOGGING_CONFIG)
 
     sys.stderr.write(f'Setting up Telegram logging: token={bool(config.token)}, chat_id={config.super_admin}\n')
@@ -87,7 +96,7 @@ def setup_logging():
     # Custom TelegramLogsHandler
     telegram_handler = TelegramLogsHandler(config.token, config.super_admin)
     telegram_handler.setLevel(logging.ERROR)  # for ERROR level only
-    telegram_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d: %(message)s'))
+    telegram_handler.setFormatter(LocalTimeFormatter('%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d: %(message)s'))
 
     # Get root logger
     logging.getLogger().addHandler(telegram_handler)
