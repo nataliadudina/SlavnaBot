@@ -12,6 +12,17 @@ super_admin = config.super_admin
 bot_token = config.token
 
 
+TZ = ZoneInfo("Europe/Moscow")
+
+
+class LocalTimeFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, tz=TZ)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.isoformat(sep=' ', timespec='seconds')
+
+
 class TelegramLogsHandler(logging.Handler):
     """ Logging handler that sends error logs to a Telegram chat. """
 
@@ -47,10 +58,13 @@ LOGGING_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
+            "()": "src.logging_config.LocalTimeFormatter",
             "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
             "datefmt": "%d-%m-%Y %H:%M",
         },
+        # dead code
         "error": {
+            "()": "src.logging_config.LocalTimeFormatter",
             "format": "%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d: %(message)s",
             "datefmt": "%d-%m-%Y %H:%M",
         },
@@ -74,17 +88,6 @@ LOGGING_CONFIG = {
         },
     }
 }
-
-
-TZ = ZoneInfo("Europe/Moscow")
-
-
-class LocalTimeFormatter(logging.Formatter):
-    def formatTime(self, record, datefmt=None):
-        dt = datetime.fromtimestamp(record.created, tz=TZ)
-        if datefmt:
-            return dt.strftime(datefmt)
-        return dt.isoformat(sep=' ', timespec='seconds')
 
 
 def setup_logging():
