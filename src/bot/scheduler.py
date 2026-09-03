@@ -13,7 +13,7 @@ from ..bot.keyboards import check_btn
 from ..config import config
 from ..googlesheets.tours_filtering import filter_for_sa_date, filter_by_date, GUIDES
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def build_notification(user_id: int | str) -> tuple[str, list[dict], list[str]] | None:
