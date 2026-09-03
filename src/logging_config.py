@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 
-from src.config import config
+from .config import config
 
 super_admin = config.super_admin
 bot_token = config.token
@@ -37,7 +37,7 @@ class TelegramLogsHandler(logging.Handler):
             message = self.format(record)
             self.send_to_telegram(message)
         except Exception:
-            # Prevent logging recursion and crashes inside logging system
+            # Report failures without triggering logging recursion.
             self.handleError(record)
 
     def send_to_telegram(self, message: str):
@@ -56,14 +56,14 @@ class TelegramLogsHandler(logging.Handler):
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
+
     "formatters": {
         "default": {
             "()": "src.logging_config.LocalTimeFormatter",
             "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
             "datefmt": "%d-%m-%Y %H:%M",
         },
-        # dead code
-        "error": {
+        "telegram": {
             "()": "src.logging_config.LocalTimeFormatter",
             "format": "%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d: %(message)s",
             "datefmt": "%d-%m-%Y %H:%M",
@@ -75,31 +75,22 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "formatter": "default",
         },
+        'telegram': {
+            '()': 'src.logging_config.TelegramLogsHandler',
+            'level': 'ERROR',
+            'formatter': 'telegram',
+            'token': bot_token,
+            'chat_id': super_admin
+
+        }
     },
-    "root": {
+    "root": {  # fallback configuration
         "level": "INFO",
-        "handlers": ["console"],
+        "handlers": ["console", "telegram"],
     },
-    "loggers": {
-        "src": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-            "propagate": False,
-        },
-    }
 }
 
 
 def setup_logging():
     """Configure application logging."""
     dictConfig(LOGGING_CONFIG)
-
-    sys.stderr.write(f'Setting up Telegram logging: token={bool(config.token)}, chat_id={config.super_admin}\n')
-
-    # Custom TelegramLogsHandler
-    telegram_handler = TelegramLogsHandler(config.token, config.super_admin)
-    telegram_handler.setLevel(logging.ERROR)  # for ERROR level only
-    telegram_handler.setFormatter(LocalTimeFormatter('%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d: %(message)s'))
-
-    # Get root logger
-    logging.getLogger().addHandler(telegram_handler)
